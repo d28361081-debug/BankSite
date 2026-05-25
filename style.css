@@ -90,7 +90,7 @@ body {
 }
 @keyframes loadProgress { to { width: 100%; } }
 
-/* Main Framework Panels */
+/* Main Framework Panels Container */
 #app-container {
     position: relative;
     z-index: 10;
@@ -102,16 +102,37 @@ body {
     padding: 20px;
 }
 
+/* СТРОГОЕ ИЗОЛИРОВАНИЕ ПАНЕЛЕЙ: По умолчанию всё скрыто */
 .panel {
-    display: none;
+    display: none !important; 
     width: 100%;
     max-width: 1100px;
-    animation: panelIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    opacity: 0;
+    transform: scale(0.96) translateY(10px);
+    filter: blur(4px);
+    transition: opacity 0.4s ease, transform 0.4s ease, filter 0.4s ease;
 }
-.panel.active { display: block; }
-@keyframes panelIn {
-    from { opacity: 0; transform: scale(0.96) translateY(10px); filter: blur(4px); }
-    to { opacity: 1; transform: scale(1) translateY(0); filter: blur(0); }
+
+/* Одиночная активная панель (например, авторизация или бан) */
+.panel.active {
+    display: block !important;
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    filter: blur(0);
+}
+
+/* Активный пользовательский дашборд — включает сетку */
+#user-dashboard.panel.active {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+}
+
+/* Активный админ-дашборд — включает вертикальный flex */
+#admin-dashboard.panel.active {
+    display: flex !important;
+    flex-direction: column;
+    gap: 30px;
 }
 
 /* Glassmorphism Structural Core */
@@ -234,11 +255,6 @@ body {
 }
 
 /* Dashboard Ecosystem */
-.dashboard-layout {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 30px;
-}
 .dash-column {
     display: flex;
     flex-direction: column;
@@ -329,14 +345,14 @@ body {
 .ledger-item.incoming { border-color: var(--neon-green); }
 .ledger-item.outgoing { border-color: var(--neon-red); }
 
-/* Admin Architecture */
-.admin-layout { grid-template-columns: 1fr; }
+/* Admin Architecture & Grid Fixes */
 .admin-top-bar {
     padding: 20px 30px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     border-left: 4px solid var(--neon-gold);
+    width: 100%;
 }
 .gold-neon-text {
     font-family: 'Orbitron', sans-serif;
@@ -347,13 +363,23 @@ body {
     display: grid;
     grid-template-columns: 4fr 6fr;
     gap: 30px;
-    margin-top: 30px;
+    width: 100%;
 }
+
+/* Исправление кнопок в админке, чтобы текст влезал полностью */
 .admin-btn-group {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
     gap: 12px;
+    width: 100%;
 }
+.admin-btn-group .cyber-btn {
+    font-size: 0.75rem;
+    padding: 12px 5px;
+    white-space: nowrap;
+    text-align: center;
+}
+
 .table-wrapper {
     overflow-y: auto;
     max-height: 350px;
@@ -410,6 +436,6 @@ th { color: var(--neon-gold); font-family: 'Orbitron', sans-serif; font-size: 0.
 
 /* Adaptive Mobile Layouts */
 @media (max-width: 868px) {
-    .dashboard-layout, .admin-grid { grid-template-columns: 1fr; }
+    #user-dashboard.panel.active, .admin-grid { grid-template-columns: 1fr !important; }
     #app-container { height: auto; padding: 40px 15px; }
 }
