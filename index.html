@@ -15,7 +15,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
     
     <link rel="stylesheet" href="style.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </head>
 <body>
 
@@ -112,8 +112,7 @@
 
             <div class="card-history panel-glass">
                 <h3 class="section-title">📁 LEDGER TRANSACTION LOG</h3>
-                <div id="transaction-log" class="transaction-log custom-scroll">
-                    </div>
+                <div id="transaction-log" class="transaction-log custom-scroll"></div>
             </div>
         </main>
     </div>
@@ -173,8 +172,7 @@
                                 <th>STATUS</th>
                             </tr>
                         </thead>
-                        <tbody id="admin-users-table">
-                            </tbody>
+                        <tbody id="admin-users-table"></tbody>
                     </table>
                 </div>
             </div>
@@ -191,5 +189,7 @@
         </div>
     </div>
 
+    <script src="database.js?v=999"></script>
+    <script src="script.js?v=999"></script>
 </body>
 </html>
