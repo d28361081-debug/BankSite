@@ -41,7 +41,7 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 20px;
+    padding: 80px 20px 40px 20px; /* Увеличили верхний отступ, чтобы контент не лез под панель тем */
     position: relative;
 }
 
@@ -66,7 +66,7 @@ body {
 }
 
 /* ==========================================
-   ЦЕНТРАЛИЗОВАННЫЙ ЭКРАН ЗАГРУЗКИ (PRELOADER)
+   ФИКС ЭКРАНА ЗАГРУЗКИ (СТРОГО ПО ЦЕНТРУ НА ТЕЛЕФОНЕ)
    ========================================== */
 #preloader {
     position: fixed;
@@ -79,7 +79,6 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    transition: opacity 0.6s ease;
 }
 
 .preloader-content {
@@ -88,26 +87,26 @@ body {
     align-items: center;
     justify-content: center;
     width: 100%;
-    max-width: 90%;
+    max-width: 100%;
     text-align: center;
     padding: 0 20px;
+    box-sizing: border-box;
 }
 
+/* Избегаем обрезания текста прелоадера */
 .logo-text {
     font-family: 'Orbitron', sans-serif;
-    font-size: 3.5rem;
+    font-size: 3rem;
     font-weight: 900;
-    letter-spacing: 5px;
+    letter-spacing: 4px;
     color: #fff;
     text-shadow: 0 0 20px var(--neon-accent);
     margin-bottom: 20px;
-    width: 100%;
-    word-wrap: break-word;
+    white-space: nowrap; /* Не даём строке ломаться хаотично */
 }
 
 .neon-bar {
-    width: 250px;
-    max-width: 80%;
+    width: 200px;
     height: 4px;
     background: rgba(255,255,255,0.1);
     border-radius: 2px;
@@ -131,7 +130,7 @@ body {
 }
 
 /* ==========================================
-   APP CONTAINER & ГЕОМЕТРИЯ ПАНЕЛЕЙ
+   КОНТЕЙНЕР ПАНЕЛЕЙ
    ========================================== */
 #app-container {
     position: relative;
@@ -175,7 +174,7 @@ body {
 }
 
 /* ==========================================
-   ФОРМА АВТОРИЗАЦИИ
+   ВХОД / РЕГИСТРАЦИЯ
    ========================================== */
 #auth-panel {
     max-width: 460px;
@@ -254,6 +253,7 @@ input:focus {
     box-shadow: 0 0 15px var(--neon-glow);
 }
 
+/* ФИКС КНОПОК: Добавлен обязательный зазор снизу */
 .cyber-btn {
     width: 100%;
     background: transparent;
@@ -267,7 +267,11 @@ input:focus {
     font-family: 'Orbitron', sans-serif;
     letter-spacing: 1px;
     transition: all 0.3s;
-    margin-bottom: 10px; /* Отступ снизу для разделения */
+    margin-bottom: 15px; /* Создаёт красивое расстояние на ПК и мобильном */
+}
+
+.cyber-btn:last-child {
+    margin-bottom: 0; /* У последней кнопки отступ убираем */
 }
 
 .cyber-btn:hover {
@@ -280,12 +284,12 @@ input:focus {
 .cyber-btn.red-glow:hover { background: var(--neon-red); color: #fff; }
 
 /* ==========================================
-   РАССТОЯНИЕ МЕЖДУ БЛОКАМИ (ОСНОВНАЯ СЕТКА ПК)
+   ФИКС ДЛЯ ПК: РАССТОЯНИЕ МЕЖДУ СЕКЦИЯМИ И КАРТОЧКАМИ
    ========================================== */
 .dashboard-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 30px; /* Фиксированное расстояние между левой и правой карточкой */
+    gap: 40px; /* Комфортный зазор между левой и правой колонкой на десктопе */
     align-items: start;
 }
 
@@ -351,9 +355,7 @@ input:focus {
 .ledger-item.incoming { border-left-color: var(--neon-green); background: rgba(0,255,102,0.03); }
 .ledger-item.outgoing { border-left-color: var(--neon-red); background: rgba(255,0,85,0.03); }
 
-/* ==========================================
-   АДМИН-ПАНЕЛЬ (РАССТОЯНИЯ И УМЕНЬШЕНИЕ СТРОК)
-   ========================================== */
+/* АДМИН-МАТРИЦА */
 .admin-top-bar {
     display: flex;
     justify-content: space-between;
@@ -366,18 +368,16 @@ input:focus {
 .admin-grid {
     display: grid;
     grid-template-columns: 1fr 1.3fr;
-    gap: 30px; /* Отступ между блоком управления и таблицей */
+    gap: 40px;
     align-items: start;
 }
 
-/* Расстояние между кнопками управления в админке */
 .admin-btn-group {
     display: flex;
     flex-direction: column;
-    gap: 14px; /* Четкий зазор между кнопками действий */
 }
 
-/* Стилизация таблицы OPERATIONAL_NODES (Убираем гигантские строки) */
+/* ТАБЛИЦА СТРОК (ФИКС ОГРОМНЫХ СТРОК И СДВИГОВ) */
 .table-wrapper {
     overflow-x: auto;
     background: rgba(0,0,0,0.3);
@@ -392,43 +392,45 @@ table {
 }
 
 th, td { 
-    padding: 12px 14px; /* Компактные отступы внутри строк */
+    padding: 12px 16px; 
     text-align: left; 
     border-bottom: 1px solid rgba(255,255,255,0.04); 
-    font-size: 0.95rem;
 }
 
 th { 
     font-family: 'Orbitron', sans-serif; 
-    font-size: 0.8rem; 
+    font-size: 0.85rem; 
     background: rgba(255,255,255,0.04); 
     color: var(--text-muted); 
     letter-spacing: 1px;
 }
 
 td {
-    vertical-align: middle;
+    font-size: 0.95rem;
 }
 
 .terminate-btn {
-    background: transparent; 
-    border: 1px solid var(--neon-red); 
-    color: var(--neon-red);
-    padding: 6px 12px; 
-    cursor: pointer; 
-    border-radius: 6px; 
-    font-weight: bold; 
-    font-family: 'Orbitron';
+    background: transparent; border: 1px solid var(--neon-red); color: var(--neon-red);
+    padding: 6px 12px; cursor: pointer; border-radius: 6px; font-weight: bold; font-family: 'Orbitron';
     font-size: 0.8rem;
-    transition: all 0.2s;
 }
 .terminate-btn:hover { background: var(--neon-red); color: #fff; }
 
-/* ПЕРЕКЛЮЧАТЕЛЬ ТЕМ */
+/* ==========================================
+   ФИКС ВЕРХНЕЙ ПАНЕЛИ ТЕМ (ЧТОБЫ НЕ ПЕРЕКРЫВАЛА)
+   ========================================== */
 .theme-selector {
-    position: fixed; top: 25px; right: 25px; z-index: 1000;
-    background: rgba(6,10,26,0.9); padding: 10px 16px; border-radius: 30px;
-    border: 1px solid var(--glass-border); display: flex; align-items: center; gap: 12px;
+    position: absolute; /* Делаем зависимой от прокрутки body, а не прибитой намертво */
+    top: 20px; 
+    right: 20px; 
+    z-index: 1000;
+    background: rgba(6,10,26,0.95); 
+    padding: 10px 18px; 
+    border-radius: 30px;
+    border: 1px solid var(--glass-border); 
+    display: flex; 
+    align-items: center; 
+    gap: 12px;
 }
 .theme-dot { width: 14px; height: 14px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; }
 .theme-dot.active { border-color: #fff; }
@@ -447,52 +449,53 @@ td {
 .alert-desc { font-size: 0.9rem; color: #cbd5e1; margin-top: 4px; }
 
 /* ==========================================
-   ПОЛНАЯ ЦЕНТРАЛИЗАЦИЯ И СЖАТИЕ ДЛЯ МОБИЛОК
+   УЛЬТРА-АДАПТИВНОСТЬ ДЛЯ ТЕЛЕФОНОВ (ФОТО 1, 2, 3)
    ========================================== */
 @media screen and (max-width: 820px) {
     body {
-        padding: 80px 15px 30px 15px;
-        align-items: flex-start;
+        padding-top: 90px; /* Резервируем безопасную зону сверху */
     }
-
     .dashboard-grid, .admin-grid {
         grid-template-columns: 1fr;
-        gap: 25px; /* Зазор между перенесенными блоками на мобильном */
-    }
-
-    .card {
-        padding: 25px 20px;
+        gap: 30px;
     }
 }
 
 @media screen and (max-width: 480px) {
+    body {
+        padding: 100px 10px 30px 10px; /* Отодвигаем весь контент вниз от панели тем */
+    }
+
     .logo-text { 
-        font-size: 2.2rem; 
+        font-size: 2.1rem; /* Идеальный размер для экрана мобильного */
         letter-spacing: 2px;
     }
 
+    /* Панель выбора тем встает аккуратно по центру вверху экрана, не залезая на заголовки */
     .theme-selector {
-        top: 15px; left: 50%; right: auto;
-        transform: translateX(-50%); width: calc(100% - 30px);
-        max-width: 320px; justify-content: center;
+        position: fixed;
+        top: 15px; 
+        left: 50%; 
+        right: auto;
+        transform: translateX(-50%); 
+        width: calc(100% - 30px);
+        max-width: 320px; 
+        justify-content: center;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.8);
     }
 
-    /* Уплотняем таблицу на экране телефона */
+    .card {
+        padding: 30px 15px !important;
+    }
+
+    /* Сжатие ячеек таблицы, чтобы они помещались без вылетов */
     th, td {
-        padding: 8px 6px;
-        font-size: 0.75rem;
+        padding: 10px 6px;
+        font-size: 0.78rem;
     }
     
-    th {
-        font-size: 0.7rem;
-    }
+    th { font-size: 0.7rem; }
 
-    .terminate-btn {
-        padding: 4px 8px;
-        font-size: 0.7rem;
-    }
-
-    .balance-text { font-size: 1.9rem; }
-    .admin-top-bar { flex-direction: column; gap: 10px; text-align: center; }
-    .ledger-item { flex-direction: column; gap: 6px; text-align: center; }
+    .balance-text { font-size: 2rem; }
+    .admin-top-bar { flex-direction: column; gap: 12px; text-align: center; }
 }
