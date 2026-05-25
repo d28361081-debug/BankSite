@@ -2,163 +2,150 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TRUSTIX BANK // CREDIT LEDGER</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TRUSTIX BANK // SYSTEM CORE</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabase.js"></script>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
+    <canvas id="cyber-canvas"></canvas>
+    <div id="cursor-glow"></div>
     <div id="cyber-notification-zone"></div>
 
     <div class="theme-selector">
-        <span style="font-family:'Orbitron'; font-size:0.75rem; font-weight:900; margin-right:5px; color:#64748b;">THEME:</span>
+        <span>THEME:</span>
         <div class="theme-dot dot-green active" onclick="changeMatrixTheme('green', this)"></div>
         <div class="theme-dot dot-cyan" onclick="changeMatrixTheme('cyan', this)"></div>
         <div class="theme-dot dot-pink" onclick="changeMatrixTheme('pink', this)"></div>
     </div>
 
-    <canvas id="cyber-canvas"></canvas>
-    <div class="cursor-glow" id="cursor-glow"></div>
-
-    <div class="preloader" id="preloader">
-        <div style="text-align: center;">
+    <div id="preloader">
+        <div class="preloader-content">
             <div class="logo-text green-neon">TRUSTIX_BANK</div>
             <div class="neon-bar">
                 <div class="progress"></div>
             </div>
-            <p style="font-family:'Orbitron'; font-size:0.8rem; letter-spacing:4px; margin-top:15px; color:#64748b;">INITIALIZING SECURE PROTOCOLS...</p>
+            <p>INITIALIZING SECURE PROTOCOLS...</p>
         </div>
     </div>
 
     <div id="app-container">
 
-        <div class="panel glass auth-panel active" id="auth-panel">
+        <div id="auth-panel" class="panel glass card active">
             <div class="neon-title-green">// SECURITY_GATEWAY</div>
-            
             <div class="auth-tabs">
                 <button class="tab-btn active" onclick="switchAuthTab('login')">LOGIN</button>
                 <button class="tab-btn" onclick="switchAuthTab('register')">REGISTER</button>
             </div>
-
-            <form id="login-form" class="auth-form active">
+            
+            <form id="login-form" class="auth-form active" onsubmit="handleLogin(e)">
                 <div class="input-group">
                     <label>USER NODE IDENTIFIER</label>
-                    <input type="text" id="login-username" required placeholder="Enter username..." autocomplete="off">
+                    <input type="text" id="login-username" placeholder="Enter username..." required autocomplete="username">
                 </div>
                 <div class="input-group">
                     <label>CYPHER PASSWORD</label>
-                    <input type="password" id="login-password" required placeholder="••••••••">
+                    <input type="password" id="login-password" placeholder="••••••••" required autocomplete="current-password">
                 </div>
-                <button type="submit" class="cyber-btn green-glow">ENGAGE INITIALIZATION</button>
+                <button type="submit" class="cyber-btn">ENGAGE INITIALIZATION</button>
             </form>
 
-            <form id="register-form" class="auth-form">
+            <form id="register-form" class="auth-form" onsubmit="handleRegister(e)">
                 <div class="input-group">
-                    <label>CREATE NEW NODE NAME</label>
-                    <input type="text" id="reg-username" required placeholder="Username..." autocomplete="off">
+                    <label>CREATE USER NODE ID</label>
+                    <input type="text" id="reg-username" placeholder="Create username..." required autocomplete="username">
                 </div>
                 <div class="input-group">
-                    <label>ENCRYPTION PASSWORD</label>
-                    <input type="password" id="reg-password" required placeholder="••••••••">
+                    <label>SECURITY ENCRYPTION KEY</label>
+                    <input type="password" id="reg-password" placeholder="Min 6 characters..." required autocomplete="new-password">
                 </div>
                 <div class="input-group">
-                    <label>REPEAT ENCRYPTION PASSWORD</label>
-                    <input type="password" id="reg-repeat" required placeholder="••••••••">
+                    <label>CONFIRM ENCRYPTION KEY</label>
+                    <input type="password" id="reg-repeat" placeholder="Repeat password..." required autocomplete="new-password">
                 </div>
-                <button type="submit" class="cyber-btn green-glow">GENERATE CORES & IDENTITY</button>
+                <button type="submit" class="cyber-btn">CREATE NEW NODE</button>
             </form>
         </div>
 
-        <div class="panel" id="user-dashboard">
-            
-            <div class="glass card" style="border-top: 3px solid var(--neon-accent);">
-                <div class="card-header">
-                    <div class="avatar-neon"></div>
-                    <div>
-                        <h2 id="user-display-name" style="font-family:'Orbitron'; letter-spacing:2px;">USER_NODE</h2>
-                        <span class="badge">SECURE TERMINAL OPERATIONAL</span>
-                    </div>
-                </div>
+        <div id="user-dashboard" class="panel">
+            <div class="dashboard-grid">
                 
-                <hr class="neon-divider">
-                
-                <div style="margin-bottom: 25px;">
-                    <p style="font-size:0.8rem; color:#64748b; letter-spacing:2px; font-weight:700;">CORE BANK ID</p>
-                    <p id="user-bank-id" style="font-family:'Orbitron'; font-size:1.4rem; font-weight:700; color:#fff; letter-spacing:1px;">00000000</p>
-                </div>
-
-                <div style="margin-bottom: 30px;">
-                    <p style="font-size:0.8rem; color:#64748b; letter-spacing:2px; font-weight:700;">TRUSTIX CREDITS LIQUIDITY</p>
-                    <div class="balance-text green-neon" id="user-balance">0.00 LMT</div>
-                </div>
-
-                <form id="transfer-form">
-                    <div style="font-family:'Orbitron'; font-size:0.9rem; font-weight:700; margin-bottom:15px; color:var(--neon-accent);">// QUANTUM_CREDIT_TRANSFER</div>
-                    <div class="input-group">
-                        <label>DESTINATION BANK ID</label>
-                        <input type="text" id="transfer-id" required placeholder="Target 8-digit ID..." maxlength="8" autocomplete="off">
+                <div class="glass card content-center">
+                    <div class="card-header">
+                        <div class="avatar-node"></div>
+                        <div class="profile-meta">
+                            <h2 id="user-display-name">USER_NODE</h2>
+                            <span class="status-badge">SECURE TERMINAL OPERATIONAL</span>
+                        </div>
                     </div>
-                    <div class="input-group">
-                        <label>TRANSACTION AMOUNT (LMT)</label>
-                        <input type="number" id="transfer-amount" step="0.01" min="0.01" required placeholder="0.00">
-                    </div>
-                    <button type="submit" class="cyber-btn green-glow">EXECUTE TRANSACTION</button>
-                </form>
-
-                <button class="cyber-btn red-glow" style="margin-top:20px; padding:10px; font-size:0.8rem;" onclick="logout()">DISCONNECT NODE</button>
-            </div>
-
-            <div class="glass card" style="border-top: 3px solid #fff;">
-                <div style="font-family:'Orbitron'; font-size:1.2rem; font-weight:900; letter-spacing:2px;">// CENTRAL_LEDGER_LOGS</div>
-                <p style="color:#64748b; font-size:0.85rem; font-weight:600;">Real-time block records of node transactions</p>
-                <hr class="neon-divider">
-                
-                <div class="ledger-container" id="ledger-history">
-                    </div>
-            </div>
-        </div>
-
-        <div class="panel" id="admin-dashboard">
-            
-            <div class="glass admin-top-bar">
-                <div>
-                    <h1 style="font-family:'Orbitron'; letter-spacing:3px; color:var(--neon-gold); text-shadow:0 0 15px var(--neon-gold-glow);">TRUSTIX CONTROL CENTER</h1>
-                    <p style="font-weight:700; font-size:0.9rem; color:#64748b;">ROOT ACCESS // SYSTEM LEVEL 0</p>
-                </div>
-                <button class="cyber-btn red-glow" style="width:auto; padding:10px 25px;" onclick="logout()">TERMINATE ROOT ACCESS</button>
-            </div>
-
-            <div class="admin-grid">
-                
-                <div class="glass card" style="border-top: 3px solid var(--neon-gold);">
-                    <div style="font-family:'Orbitron'; color:var(--neon-gold); font-weight:700; margin-bottom:20px;">// OVERRIDE_COMMAND_CONSOLES</div>
                     
+                    <div class="meta-label">CORE BANK ID</div>
+                    <div id="user-bank-id" class="meta-value">00000000</div>
+                    
+                    <div class="meta-label">TRUSTIX CREDITS LIQUIDITY</div>
+                    <div class="balance-box">
+                        <div id="user-balance" class="balance-text">0.00 LMT</div>
+                    </div>
+
+                    <div class="neon-title-green" style="font-size:1.1rem; margin-bottom:15px;">// QUANTUM_CREDIT_TRANSFER</div>
+                    <form onsubmit="handleTransfer(e)" style="width: 100%;">
+                        <div class="input-group">
+                            <label>DESTINATION BANK ID</label>
+                            <input type="text" id="transfer-id" placeholder="Target 8-digit ID..." required>
+                        </div>
+                        <div class="input-group">
+                            <label>TRANSACTION AMOUNT (LMT)</label>
+                            <input type="number" id="transfer-amount" step="0.01" placeholder="0.00" required>
+                        </div>
+                        <button type="submit" class="cyber-btn">EXECUTE TRANSACTION</button>
+                    </form>
+                    
+                    <button class="cyber-btn red-glow disconnect-btn" onclick="logout()">DISCONNECT NODE</button>
+                </div>
+
+                <div class="glass card">
+                    <div class="section-title">// CENTRAL_LEDGER_LOGS</div>
+                    <div class="section-subtitle">Real-time block records of node transactions</div>
+                    <div id="ledger-history" class="ledger-container">
+                        </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div id="admin-dashboard" class="panel glass card">
+            <div class="admin-top-bar">
+                <h1>TRUSTIX CONTROL CENTER</h1>
+                <button class="cyber-btn red-glow" style="margin:0; padding:10px 20px; width:auto;" onclick="logout()">TERMINATE ROOT ACCESS</button>
+            </div>
+            
+            <div class="admin-grid">
+                <div class="admin-controls">
+                    <div class="section-title">// OVERRIDE_COMMAND_CONSOLES</div>
                     <div class="input-group">
                         <label>TARGET BANK ID</label>
-                        <input type="text" id="admin-target-id" placeholder="8-digit ID..." maxlength="8" autocomplete="off">
+                        <input type="text" id="admin-target-id" placeholder="8-digit ID...">
                     </div>
                     <div class="input-group">
                         <label>CREDIT QUANTITY OPTION</label>
                         <input type="number" id="admin-amount" step="0.01" placeholder="0.00">
                     </div>
-
                     <div class="admin-btn-group">
-                        <button class="cyber-btn gold-glow" onclick="executeAdminAction('give')">INJECT CREDITS</button>
-                        <button class="cyber-btn gold-glow" onclick="executeAdminAction('remove')">DRAIN CREDITS</button>
+                        <button class="cyber-btn" onclick="executeAdminAction('give')">INJECT CREDITS</button>
+                        <button class="cyber-btn red-glow" onclick="executeAdminAction('remove')">DRAIN CREDITS</button>
                         <button class="cyber-btn red-glow" onclick="executeAdminAction('ban')">BAN NODE</button>
-                        <button class="cyber-btn green-glow" onclick="executeAdminAction('unban')">REVIVE NODE</button>
+                        <button class="cyber-btn" onclick="executeAdminAction('unban')">REVIVE NODE</button>
                     </div>
                 </div>
 
-                <div class="glass card" style="border-top: 3px solid rgba(255,255,255,0.2);">
-                    <div style="font-family:'Orbitron'; font-weight:700; margin-bottom:15px;">// CURRENT_OPERATIONAL_NODES</div>
-                    
+                <div class="admin-table-panel">
+                    <div class="section-title">// CURRENT_OPERATIONAL_NODES</div>
                     <div class="table-wrapper">
                         <table>
                             <thead>
@@ -175,14 +162,13 @@
                         </table>
                     </div>
                 </div>
-
             </div>
         </div>
 
-        <div class="panel glass ban-panel" id="ban-panel">
+        <div id="ban-panel" class="panel glass card ban-panel">
             <div class="ban-title-red">NODE_TERMINATED</div>
-            <p style="font-family:'Orbitron'; font-size:1.1rem; letter-spacing:4px; color:#fff; margin-bottom:20px;">ACCESS DENIED BY MASTER CONTROL</p>
-            <p style="color:#64748b; font-weight:600; line-height:1.6; margin-bottom:30px;">
+            <div class="section-title" style="color:var(--neon-red); justify-content:center;">ACCESS DENIED BY MASTER CONTROL</div>
+            <p style="margin-bottom:25px; color:var(--text-muted); font-size:0.95rem; line-height:1.6;">
                 Your network identity hash has been completely blacklisted due to operational protocol violations. 
                 All asset flows and credit matrices associated with this Core Bank ID have been permanently frozen.
             </p>
@@ -191,11 +177,6 @@
 
     </div>
 
-    <script>
-        document.getElementById('login-form').addEventListener('submit', function(e) { handleLogin(e); });
-        document.getElementById('register-form').addEventListener('submit', function(e) { handleRegister(e); });
-        document.getElementById('transfer-form').addEventListener('submit', function(e) { handleTransfer(e); });
-    </script>
     <script src="script.js"></script>
 </body>
 </html>
