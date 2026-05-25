@@ -3,9 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZHOTOMER RP // DATABASE SYSTEM v3.0</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <title>TRUSTIX BANK // Cyberpunk Financial System</title>
+    
+    <meta name="description" content="Futuristic Premium Cyberpunk Banking Ecosystem.">
+    <meta property="og:title" content="TRUSTIX BANK // Next-Gen RP Finance">
+    <meta property="og:description" content="AAA-Gaming Interface Asset for Digital Banking Control.">
+    
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     
@@ -14,167 +17,160 @@
 </head>
 <body>
 
-    <div id="preloader" class="preloader">
-        <div class="preloader-content">
-            <h1 class="glitch-text" data-text="ZHOTOMER RP">ZHOTOMER RP</h1>
-            <div class="loader-bar-container">
-                <div class="loader-bar"></div>
-            </div>
-            <p class="loader-status">CONNECTING TO ZHOTOMER CENTRAL SECURE NODE...</p>
+    <canvas id="cyber-canvas"></canvas>
+
+    <div class="cursor-glow" id="cursor-glow"></div>
+
+    <div class="preloader" id="preloader">
+        <div class="loader-content">
+            <h1 class="logo-text glitch" data-text="TRUSTIX">TRUSTIX</h1>
+            <div class="neon-bar"><div class="progress"></div></div>
+            <p class="status-text">INITIALIZING QUANTUM ENCRYPTION...</p>
         </div>
     </div>
 
-    <div id="canvas-container"></div>
-    <div class="scanlines"></div>
-
     <main id="app-container">
         
-        <header class="main-header">
-            <div class="header-logo">
-                <h1 class="main-title">ZHOTOMER <span class="accent-green">RP</span></h1>
-                <p class="main-subtitle">DATABASE SYSTEM // VER. 3.0</p>
-            </div>
-            
-            <div class="search-box-container">
-                <input type="text" id="global-search" placeholder="Поиск по статьям, пунктам или наказаниям...">
-                <span class="search-icon">🔍</span>
+        <section class="panel glass auth-panel active" id="auth-panel">
+            <h2 class="neon-title-green">CORE // AUTHORIZATION</h2>
+            <div class="auth-tabs">
+                <button class="tab-btn active" onclick="switchAuthTab('login')">LOGIN</button>
+                <button class="tab-btn" onclick="switchAuthTab('register')">REGISTER</button>
             </div>
 
-            <div class="header-auth-zone" id="auth-zone">
-                <button id="trigger-auth-btn" class="nav-login-btn">ВХОД В ТЕРМИНАЛ</button>
-            </div>
-        </header>
-
-        <section id="laws-section" class="content-section">
-            <div class="laws-grid" id="laws-playground">
+            <form id="login-form" class="auth-form active" onsubmit="handleLogin(event)">
+                <div class="input-group">
+                    <label>NET_ID / USERNAME</label>
+                    <input type="text" id="login-username" required placeholder="Enter terminal ID...">
                 </div>
+                <div class="input-group">
+                    <label>ACCESS_KEY / PASSWORD</label>
+                    <input type="password" id="login-password" required placeholder="••••••••">
+                </div>
+                <button type="submit" class="cyber-btn green-glow">INITIALIZE LINK</button>
+            </form>
+
+            <form id="register-form" class="auth-form" onsubmit="handleRegister(event)">
+                <div class="input-group">
+                    <label>CREATE USERNAME</label>
+                    <input type="text" id="reg-username" required placeholder="Alpha_01">
+                </div>
+                <div class="input-group">
+                    <label>SECURE PASSWORD</label>
+                    <input type="password" id="reg-password" required placeholder="••••••••">
+                </div>
+                <div class="input-group">
+                    <label>CONFIRM PASSWORD</label>
+                    <input type="password" id="reg-repeat" required placeholder="••••••••">
+                </div>
+                <button type="submit" class="cyber-btn green-glow">CREATE ACCOUNT</button>
+            </form>
         </section>
 
-        <div id="modal-overlay" class="modal-overlay hidden">
-            <div class="cyber-modal-card" id="auth-card-block">
-                <button class="close-modal-btn" id="close-modal">✕</button>
-                
-                <div class="auth-tabs" id="modal-tabs-header">
-                    <button id="tab-login" class="tab-btn active">ВХОД</button>
-                    <button id="tab-register" class="tab-btn">РЕГИСТРАЦИЯ</button>
-                </div>
-
-                <form id="login-form" class="auth-form">
-                    <div class="input-group">
-                        <input type="text" id="login-username" required placeholder=" ">
-                        <label>Username</label>
-                    </div>
-                    <div class="input-group">
-                        <input type="password" id="login-password" required placeholder=" ">
-                        <label>Password</label>
-                    </div>
-                    <button type="submit" class="cyber-btn btn-green">ACCESS TERMINAL</button>
-                </form>
-
-                <form id="register-form" class="auth-form hidden">
-                    <div class="input-group">
-                        <input type="text" id="reg-username" required placeholder=" ">
-                        <label>Username</label>
-                    </div>
-                    <div class="input-group">
-                        <input type="password" id="reg-password" required placeholder=" ">
-                        <label>Password</label>
-                    </div>
-                    <div class="input-group">
-                        <input type="password" id="reg-password-repeat" required placeholder=" ">
-                        <label>Repeat Password</label>
-                    </div>
-                    <button type="submit" class="cyber-btn btn-green">REGISTER USER</button>
-                </form>
-            </div>
-
-            <div class="cyber-modal-card hidden" id="dashboard-card-block">
-                <button class="close-modal-btn" id="close-dash">✕</button>
-                
-                <div class="dash-user-header">
-                    <div class="user-avatar-zone"></div>
-                    <div>
-                        <h2 id="dash-username">CHARACTER_NAME</h2>
-                        <p class="id-badge">BANK ID: <span id="dash-bank-id" class="neon-cyan-text">00000000</span></p>
-                    </div>
-                </div>
-
-                <div class="dash-balance-block">
-                    <span class="balance-lbl">КВАНТОВЫЙ БАЛАНС</span>
-                    <h3 class="balance-val"><span id="dash-balance-amount">0</span> <span class="currency-sign">N$</span></h3>
-                </div>
-
-                <div class="dash-grid-actions">
-                    <div class="action-sub-panel">
-                        <h4>МЕЖБАНКОВСКИЙ ПЕРЕВОД</h4>
-                        <form id="transfer-form">
-                            <div class="input-group">
-                                <input type="text" id="transfer-target" required placeholder=" " maxlength="8">
-                                <label>Recipient Bank ID</label>
-                            </div>
-                            <div class="input-group">
-                                <input type="number" id="transfer-sum" required placeholder=" " min="1">
-                                <label>Сумма перевода</label>
-                            </div>
-                            <button type="submit" class="cyber-btn btn-cyan">ОТПРАВИТЬ КРЕДИТЫ</button>
-                        </form>
-                    </div>
-
-                    <div class="action-sub-panel">
-                        <h4>ИСТОРИЯ ОПЕРАЦИЙ</h4>
-                        <div class="tx-history-scroll">
-                            <table class="tx-mini-table">
-                                <tbody id="tx-history-rows">
-                                    </tbody>
-                            </table>
+        <section class="panel dashboard-layout" id="user-dashboard">
+            <div class="dash-column">
+                <div class="glass card profile-card border-pulse">
+                    <div class="card-header">
+                        <div class="avatar-neon"></div>
+                        <div>
+                            <h3 id="user-display-name">SYSTEM_USER</h3>
+                            <span class="badge">SECURE_NODE</span>
                         </div>
                     </div>
-                </div>
-                <button class="logout-terminal-btn" id="logout-btn">DISCONNECT SYSTEM</button>
-            </div>
-
-            <div class="cyber-modal-card admin-variant hidden" id="admin-card-block">
-                <button class="close-modal-btn" id="close-admin">✕</button>
-                <div class="admin-panel-title">MASTER CONTROL TERMINAL (ADMIN)</div>
-                
-                <div class="admin-main-layout">
-                    <div class="admin-table-container">
-                        <h4>РЕЕСТР ГРАЖДАН И СЧЕТОВ</h4>
-                        <div class="admin-scroll">
-                            <table class="admin-data-table">
-                                <thead>
-                                    <tr>
-                                        <th>BANK ID</th>
-                                        <th>USERNAME</th>
-                                        <th>БАЛАНС</th>
-                                        <th>СТАТУС</th>
-                                        <th>ДЕЙСТВИЯ</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="admin-users-rows">
-                                    </tbody>
-                            </table>
-                        </div>
+                    <hr class="neon-divider">
+                    <div class="card-body">
+                        <p class="label">BANK ACCOUNT ID</p>
+                        <p class="bank-id-text" id="user-bank-id">00000000</p>
+                        <p class="label">NET CREDIT BALANCE</p>
+                        <p class="balance-text green-neon" id="user-balance">0.00 ฿</p>
                     </div>
                 </div>
-                <button class="logout-terminal-btn" id="admin-logout-btn">ВЫЙТИ ИЗ ЯДРА</button>
-            </div>
-        </div>
 
-        <div id="notify-box" class="notify-box"></div>
-
-        <div id="ban-screen" class="ban-screen-overlay hidden">
-            <div class="ban-box">
-                <div class="ban-alert-icon">⚠️</div>
-                <h2>NODE DISCONNECTED</h2>
-                <p>Ваш терминал заблокирован администрацией ZHOTOMER RP.</p>
-                <button class="cyber-btn btn-red" id="ban-close-app">ВЕРНУТЬСЯ К БАЗЕ</button>
+                <div class="glass card action-card">
+                    <h3 class="neon-title-green">⚡ CREDIT TRANSFER</h3>
+                    <form onsubmit="handleTransfer(event)">
+                        <div class="input-group">
+                            <label>DESTINATION BANK ID</label>
+                            <input type="text" id="transfer-id" maxlength="8" placeholder="E.g., 58294173" required>
+                        </div>
+                        <div class="input-group">
+                            <label>AMOUNT (฿)</label>
+                            <input type="number" id="transfer-amount" step="0.01" min="0.1" placeholder="0.00" required>
+                        </div>
+                        <button type="submit" class="cyber-btn green-glow">EXECUTE TRANSACTION</button>
+                    </form>
+                </div>
             </div>
-        </div>
+
+            <div class="dash-column">
+                <div class="glass card history-card">
+                    <h3 class="neon-title-green">📡 LIVE LEDGER PROTOCOLS</h3>
+                    <div class="ledger-container" id="ledger-history">
+                        </div>
+                </div>
+                <button class="cyber-btn logout-btn" onclick="logout()">DISCONNECT TERMINAL</button>
+            </div>
+        </section>
+
+        <section class="panel dashboard-layout admin-layout" id="admin-dashboard">
+            <div class="admin-top-bar glass">
+                <h2 class="gold-neon-text">⚡ TRUSTIX OVERLORD CONTROL PANEL</h2>
+                <div class="admin-meta">
+                    <span>ROOT_ACCESS: ACTIVE</span>
+                    <button class="cyber-btn logout-btn" onclick="logout()">LOGOUT</button>
+                </div>
+            </div>
+
+            <div class="admin-grid">
+                <div class="glass card admin-actions">
+                    <h3 class="gold-neon-text">MATRIX MODIFICATION</h3>
+                    <div class="input-group">
+                        <label>TARGET BANK ID</label>
+                        <input type="text" id="admin-target-id" placeholder="Target 8-digit ID">
+                    </div>
+                    <div class="input-group">
+                        <label>CREDIT QUANTITY</label>
+                        <input type="number" id="admin-amount" placeholder="0.00">
+                    </div>
+                    <div class="admin-btn-group">
+                        <button class="cyber-btn gold-glow" onclick="executeAdminAction('give')">GIVE CREDITS</button>
+                        <button class="cyber-btn red-glow" onclick="executeAdminAction('remove')">BURN CREDITS</button>
+                        <button class="cyber-btn red-glow" onclick="executeAdminAction('ban')">TERMINATE / BAN</button>
+                        <button class="cyber-btn green-glow" onclick="executeAdminAction('unban')">REVIVE / UNBAN</button>
+                    </div>
+                </div>
+
+                <div class="glass card admin-monitor">
+                    <h3 class="gold-neon-text">SYSTEM NODES MONITOR</h3>
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>USER</th>
+                                    <th>BANK ID</th>
+                                    <th>BALANCE</th>
+                                    <th>STATUS</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-user-table">
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="panel glass ban-panel" id="ban-panel">
+            <div class="glitch-wrapper">
+                <h1 class="ban-title-red glitch" data-text="TERMINAL BANNED">TERMINAL BANNED</h1>
+            </div>
+            <p class="ban-desc">Your biological ID and access tokens have been permanently neutralized due to Anti-Cyberwarfare Violation Protocol.</p>
+            <div class="cyber-error-code">ERROR_CODE: 0x88F0024B</div>
+        </section>
 
     </main>
 
-    <script src="database.js"></script>
+    <script src="supabase.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
