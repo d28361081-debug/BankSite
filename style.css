@@ -66,14 +66,14 @@ body {
 }
 
 /* ==========================================
-   PRELOADER - ТВОЙ ОРИГИНАЛЬНЫЙ ЦЕНТРИРОВАННЫЙ СТИЛЬ
+   ЦЕНТРАЛИЗОВАННЫЙ ЭКРАН ЗАГРУЗКИ (PRELOADER)
    ========================================== */
 #preloader {
     position: fixed;
     top: 0;
     left: 0;
-    width: 100vw;
-    height: 100vh;
+    width: 100%;
+    height: 100%;
     background: #020208;
     z-index: 99999;
     display: flex;
@@ -83,8 +83,14 @@ body {
 }
 
 .preloader-content {
-    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
     width: 100%;
+    max-width: 90%;
+    text-align: center;
+    padding: 0 20px;
 }
 
 .logo-text {
@@ -95,13 +101,15 @@ body {
     color: #fff;
     text-shadow: 0 0 20px var(--neon-accent);
     margin-bottom: 20px;
+    width: 100%;
+    word-wrap: break-word;
 }
 
 .neon-bar {
     width: 250px;
+    max-width: 80%;
     height: 4px;
     background: rgba(255,255,255,0.1);
-    margin: 0 auto 20px auto;
     border-radius: 2px;
     overflow: hidden;
     position: relative;
@@ -123,16 +131,18 @@ body {
 }
 
 /* ==========================================
-   APP CONTAINER & PANELS MATRIX
+   APP CONTAINER & ГЕОМЕТРИЯ ПАНЕЛЕЙ
    ========================================== */
 #app-container {
     position: relative;
     z-index: 10;
     width: 100%;
     max-width: 1200px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
-/* Возвращаем твой плавный ПК-дизайн без ломания разметки */
 .panel {
     width: 100%;
     opacity: 0;
@@ -143,7 +153,6 @@ body {
     transition: opacity 0.4s ease, transform 0.4s ease;
 }
 
-/* Когда панель активна — она разворачивается во всю красу */
 .panel.active {
     opacity: 1;
     pointer-events: auto;
@@ -166,7 +175,7 @@ body {
 }
 
 /* ==========================================
-   AUTH GATEWAY
+   ФОРМА АВТОРИЗАЦИИ
    ========================================== */
 #auth-panel {
     max-width: 460px;
@@ -258,6 +267,7 @@ input:focus {
     font-family: 'Orbitron', sans-serif;
     letter-spacing: 1px;
     transition: all 0.3s;
+    margin-bottom: 10px; /* Отступ снизу для разделения */
 }
 
 .cyber-btn:hover {
@@ -270,12 +280,13 @@ input:focus {
 .cyber-btn.red-glow:hover { background: var(--neon-red); color: #fff; }
 
 /* ==========================================
-   DASHBOARDS GRID (ДЛЯ ТВОЕГО ПК КРУТОГО ВИДА)
+   РАССТОЯНИЕ МЕЖДУ БЛОКАМИ (ОСНОВНАЯ СЕТКА ПК)
    ========================================== */
 .dashboard-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 35px;
+    gap: 30px; /* Фиксированное расстояние между левой и правой карточкой */
+    align-items: start;
 }
 
 .card-header {
@@ -325,7 +336,7 @@ input:focus {
     text-align: center;
 }
 
-/* LEDGER HISTORY */
+/* ИСТОРИЯ ТРАНСАКЦИЙ */
 .ledger-container { max-height: 450px; overflow-y: auto; padding-right: 5px; }
 .ledger-item {
     display: flex;
@@ -341,13 +352,13 @@ input:focus {
 .ledger-item.outgoing { border-left-color: var(--neon-red); background: rgba(255,0,85,0.03); }
 
 /* ==========================================
-   ADMIN PANEL MODULE
+   АДМИН-ПАНЕЛЬ (РАССТОЯНИЯ И УМЕНЬШЕНИЕ СТРОК)
    ========================================== */
 .admin-top-bar {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 35px;
+    margin-bottom: 30px;
     border-bottom: 2px solid var(--neon-accent);
     padding-bottom: 20px;
 }
@@ -355,33 +366,65 @@ input:focus {
 .admin-grid {
     display: grid;
     grid-template-columns: 1fr 1.3fr;
-    gap: 35px;
+    gap: 30px; /* Отступ между блоком управления и таблицей */
+    align-items: start;
 }
 
+/* Расстояние между кнопками управления в админке */
 .admin-btn-group {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px; /* Четкий зазор между кнопками действий */
 }
 
+/* Стилизация таблицы OPERATIONAL_NODES (Убираем гигантские строки) */
 .table-wrapper {
     overflow-x: auto;
     background: rgba(0,0,0,0.3);
     border-radius: 12px;
     border: 1px solid rgba(255,255,255,0.04);
+    width: 100%;
 }
 
-table { width: 100%; border-collapse: collapse; }
-th, td { padding: 15px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.02); }
-th { font-family: 'Orbitron', sans-serif; font-size: 0.85rem; background: rgba(255,255,255,0.04); color: var(--text-muted); }
+table { 
+    width: 100%; 
+    border-collapse: collapse; 
+}
+
+th, td { 
+    padding: 12px 14px; /* Компактные отступы внутри строк */
+    text-align: left; 
+    border-bottom: 1px solid rgba(255,255,255,0.04); 
+    font-size: 0.95rem;
+}
+
+th { 
+    font-family: 'Orbitron', sans-serif; 
+    font-size: 0.8rem; 
+    background: rgba(255,255,255,0.04); 
+    color: var(--text-muted); 
+    letter-spacing: 1px;
+}
+
+td {
+    vertical-align: middle;
+}
 
 .terminate-btn {
-    background: transparent; border: 1px solid var(--neon-red); color: var(--neon-red);
-    padding: 6px 12px; cursor: pointer; border-radius: 6px; font-weight: bold; font-family: 'Orbitron';
+    background: transparent; 
+    border: 1px solid var(--neon-red); 
+    color: var(--neon-red);
+    padding: 6px 12px; 
+    cursor: pointer; 
+    border-radius: 6px; 
+    font-weight: bold; 
+    font-family: 'Orbitron';
+    font-size: 0.8rem;
+    transition: all 0.2s;
 }
 .terminate-btn:hover { background: var(--neon-red); color: #fff; }
 
-/* THEME CONTROL PANEL */
+/* ПЕРЕКЛЮЧАТЕЛЬ ТЕМ */
 .theme-selector {
     position: fixed; top: 25px; right: 25px; z-index: 1000;
     background: rgba(6,10,26,0.9); padding: 10px 16px; border-radius: 30px;
@@ -393,7 +436,7 @@ th { font-family: 'Orbitron', sans-serif; font-size: 0.85rem; background: rgba(2
 .dot-cyan { background: #00f0ff; }
 .dot-pink { background: #ff00ff; }
 
-/* NOTIFICATIONS MATRIX */
+/* УВЕДОМЛЕНИЯ */
 #cyber-notification-zone { position: fixed; bottom: 25px; right: 25px; z-index: 100000; display: flex; flex-direction: column; gap: 12px; }
 .cyber-alert { background: rgba(2,2,8,0.95); border: 1px solid #64748b; padding: 14px 22px; border-radius: 8px; min-width: 280px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
 .cyber-alert-success { border-left: 5px solid var(--neon-green); border-color: rgba(0,255,102,0.3); }
@@ -404,38 +447,52 @@ th { font-family: 'Orbitron', sans-serif; font-size: 0.85rem; background: rgba(2
 .alert-desc { font-size: 0.9rem; color: #cbd5e1; margin-top: 4px; }
 
 /* ==========================================
-   ИДЕАЛЬНЫЙ МОБИЛЬНЫЙ ФИКС БЕЗ СЛОМА ДЛЯ ПК
+   ПОЛНАЯ ЦЕНТРАЛИЗАЦИЯ И СЖАТИЕ ДЛЯ МОБИЛОК
    ========================================== */
 @media screen and (max-width: 820px) {
+    body {
+        padding: 80px 15px 30px 15px;
+        align-items: flex-start;
+    }
+
     .dashboard-grid, .admin-grid {
         grid-template-columns: 1fr;
-        gap: 25px;
+        gap: 25px; /* Зазор между перенесенными блоками на мобильном */
+    }
+
+    .card {
+        padding: 25px 20px;
     }
 }
 
 @media screen and (max-width: 480px) {
-    body {
-        align-items: flex-start;
-        padding: 90px 12px 20px 12px;
+    .logo-text { 
+        font-size: 2.2rem; 
+        letter-spacing: 2px;
     }
-
-    .logo-text { font-size: 2.3rem; }
 
     .theme-selector {
-        top: 20px; left: 50%; right: auto;
-        transform: translateX(-50%); width: calc(100% - 24px);
-        max-width: 340px; justify-content: center;
+        top: 15px; left: 50%; right: auto;
+        transform: translateX(-50%); width: calc(100% - 30px);
+        max-width: 320px; justify-content: center;
     }
 
-    .panel, .glass.card {
-        padding: 25px 15px !important;
+    /* Уплотняем таблицу на экране телефона */
+    th, td {
+        padding: 8px 6px;
+        font-size: 0.75rem;
     }
-
-    .balance-text { font-size: 2rem; }
-    .admin-btn-group { grid-template-columns: 1fr; }
-    .admin-top-bar { flex-direction: column; gap: 15px; text-align: center; }
     
-    .ledger-item { flex-direction: column; gap: 8px; text-align: center; }
-    table { font-size: 0.8rem; }
-    th, td { padding: 10px 5px; }
+    th {
+        font-size: 0.7rem;
+    }
+
+    .terminate-btn {
+        padding: 4px 8px;
+        font-size: 0.7rem;
+    }
+
+    .balance-text { font-size: 1.9rem; }
+    .admin-top-bar { flex-direction: column; gap: 10px; text-align: center; }
+    .ledger-item { flex-direction: column; gap: 6px; text-align: center; }
 }
