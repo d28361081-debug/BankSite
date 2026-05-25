@@ -4,192 +4,79 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TRUSTIX BANK // Terminal Dashboard</title>
-    
-    <meta name="description" content="Futuristic Premium Cyberpunk Banking Ecosystem">
-    <meta property="og:title" content="TRUSTIX BANK // Terminal">
-    <meta property="og:description" content="Next-gen digital assets & banking dashboard.">
-    <meta property="og:type" content="website">
-    
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
-    
     <link rel="stylesheet" href="style.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </head>
 <body>
-
-    <canvas id="cyber-canvas"></canvas>
-
-    <div id="preloader" class="preloader">
-        <div class="loader-content">
-            <div class="loader-logo">TRUSTIX</div>
-            <div class="loader-bar"><div class="progress"></div></div>
-            <div class="loader-status">INITIALIZING QUANTUM ENCRYPTION...</div>
-        </div>
-    </div>
-
-    <div id="notification-container" class="notification-container"></div>
-
-    <div id="auth-screen" class="screen active">
-        <div class="auth-container panel-glass">
-            <div class="glitch-wrapper">
-                <h1 class="bank-logo" data-text="TRUSTIX BANK">TRUSTIX BANK</h1>
+    <div class="terminal-container">
+        
+        <div id="auth-screen" class="terminal-card">
+            <h1 class="blink-text">====== TRUSTIX BANK ======</h1>
+            <p class="system-status">STATUS: ONLINE // SECURE_CONNECTION</p>
+            <hr>
+            <div class="form-group">
+                <label>ИДЕНТИФИКАТОР ПОЛЬЗОВАТЕЛЯ (ЛОГИН):</label>
+                <input type="text" id="username" placeholder="Введите имя..." autocomplete="off">
             </div>
-            <p class="auth-subtitle">SECURE NEURAL CORE v4.81</p>
+            <div class="form-group">
+                <label>КРИПТО-ПАРОЛЬ (ДОСТУП):</label>
+                <input type="password" id="password" placeholder="Введите пароль...">
+            </div>
+            <hr>
+            <div class="button-group">
+                <button id="login-btn" class="btn-primary">ВХОД В СИСТЕМУ</button>
+                <button id="register-btn" class="btn-secondary">РЕГИСТРАЦИЯ</button>
+            </div>
+        </div>
+
+        <div id="app-screen" class="terminal-card hidden">
+            <div class="card-header">
+                <h2>ПАНЕЛЬ УПРАВЛЕНИЯ: <span id="user-login-name">...</span></h2>
+                <button id="logout-btn" class="btn-danger">ВЫХОД</button>
+            </div>
+            <p class="tech-id-label">ТЕХНИЧЕСКИЙ ID: <span id="user-tech-id">...</span></p>
+            <hr>
             
-            <div class="auth-tabs">
-                <button id="tab-login" class="tab-btn active">LOG IN</button>
-                <button id="tab-register" class="tab-btn">REGISTER</button>
+            <div class="balance-section">
+                <h3>ДОСТУПНЫЙ БАЛАНС:</h3>
+                <div class="balance-display"><span id="user-balance">0.00</span> ¤</div>
             </div>
+            <hr>
 
-            <form id="login-form" class="auth-form active">
-                <div class="input-group">
-                    <input type="text" id="login-username" required placeholder=" ">
-                    <label>NET_USERNAME</label>
+            <div class="transfer-section">
+                <h3>МЕЖБАНКОВСКИЙ ПЕРЕВОД</h3>
+                <div class="form-group">
+                    <label>ПОЛУЧАТЕЛЬ (ЛОГИН):</label>
+                    <input type="text" id="target-user" placeholder="Имя получателя...">
                 </div>
-                <div class="input-group">
-                    <input type="password" id="login-password" required placeholder=" ">
-                    <label>ACCESS_CRYPT</label>
+                <div class="form-group">
+                    <label>СУММА ПЕРЕВОДА (¤):</label>
+                    <input type="number" id="transfer-amount" placeholder="0.00" min="1">
                 </div>
-                <button type="submit" class="btn btn-neon">INITIALIZE SESSION</button>
-            </form>
+                <button id="send-btn" class="btn-primary" style="width: 100%;">ВЫПОЛНИТЬ ТРАНЗАКЦИЮ</button>
+            </div>
+            <hr>
 
-            <form id="register-form" class="auth-form">
-                <div class="input-group">
-                    <input type="text" id="reg-username" required placeholder=" ">
-                    <label>NEW_USERNAME</label>
-                </div>
-                <div class="input-group">
-                    <input type="password" id="reg-password" required placeholder=" ">
-                    <label>CREATE_CRYPT</label>
-                </div>
-                <div class="input-group">
-                    <input type="password" id="reg-repeat-password" required placeholder=" ">
-                    <label>CONFIRM_CRYPT</label>
-                </div>
-                <button type="submit" class="btn btn-neon-cyan">CREATE QUANTUM ID</button>
-            </form>
+            <div class="history-section">
+                <h3>ПОСЛЕДНИЕ ЛОГИ ОПЕРАЦИЙ</h3>
+                <ul id="history-list" class="history-log">
+                    </ul>
+            </div>
         </div>
-    </div>
 
-    <div id="user-dashboard" class="screen">
-        <header class="main-header panel-glass">
-            <div class="header-logo">TRUSTIX // SYSTEM</div>
-            <div class="header-status"><span class="pulse-dot green"></span> SECURE CONNECTION</div>
-            <button class="btn-logout" onclick="logout()">LOGOUT_</button>
-        </header>
-
-        <main class="dashboard-grid grid-user">
-            <div class="card-profile panel-glass floating">
-                <div class="profile-header">
-                    <div class="avatar-neon"></div>
-                    <div>
-                        <h2 id="user-display-name" class="glow-text">OPERATOR</h2>
-                        <p id="user-display-id" class="tech-id">ID: 00000000</p>
-                    </div>
+        <div id="admin-screen" class="terminal-card hidden">
+            <div class="card-header">
+                <h2 style="color: #ff5555;">ТЕРМИНАЛ РАЗРАБОТЧИКА (ADMIN)</h2>
+                <button id="admin-logout-btn" class="btn-danger">ВЫХОД</button>
+            </div>
+            <hr>
+            <h3>УПРАВЛЕНИЕ УЧЁТНЫМИ ЗАПИСЯМИ</h3>
+            <div id="admin-users-list" class="admin-users-scroll">
                 </div>
-                <div class="balance-display">
-                    <span class="label">CREDITS AVAIL</span>
-                    <h1 id="user-display-balance" class="balance-amount">0.00 <span>₮</span></h1>
-                </div>
-            </div>
-
-            <div class="card-transfer panel-glass">
-                <h3 class="section-title">⚡ QUICK WIRE TRANSFER</h3>
-                <form id="transfer-form">
-                    <div class="input-group">
-                        <input type="text" id="transfer-target-id" required placeholder=" ">
-                        <label>TARGET_BANK_ID</label>
-                    </div>
-                    <div class="input-group">
-                        <input type="number" id="transfer-amount" step="0.01" min="0.01" required placeholder=" ">
-                        <label>TRANSACTION_AMOUNT (₮)</label>
-                    </div>
-                    <button type="submit" class="btn btn-neon">EXECUTE TRANSFER</button>
-                </form>
-            </div>
-
-            <div class="card-history panel-glass">
-                <h3 class="section-title">📁 LEDGER TRANSACTION LOG</h3>
-                <div id="transaction-log" class="transaction-log custom-scroll"></div>
-            </div>
-        </main>
-    </div>
-
-    <div id="admin-dashboard" class="screen">
-        <header class="main-header panel-glass admin-border">
-            <div class="header-logo gold-glow">TRUSTIX // OVERLORD OMNI-PANEL</div>
-            <div class="header-status"><span class="pulse-dot gold"></span> GOD_MODE ACTIVE</div>
-            <button class="btn-logout gold-border" onclick="logout()">DISCONNECT_</button>
-        </header>
-
-        <main class="dashboard-grid grid-admin">
-            <div class="card-profile panel-glass admin-border gold-shadow">
-                <div class="profile-header">
-                    <div class="avatar-neon admin-avatar"></div>
-                    <div>
-                        <h2 class="gold-glow">ROOT_OVERLORD</h2>
-                        <p class="tech-id text-gold">ID: MASTER_CORE</p>
-                    </div>
-                </div>
-                <div class="balance-display">
-                    <span class="label text-gold">LIQUIDITY POOL</span>
-                    <h1 class="balance-amount gold-glow">∞ <span>₮</span></h1>
-                </div>
-            </div>
-
-            <div class="card-transfer panel-glass admin-border">
-                <h3 class="section-title text-gold">⚙️ CRITICAL KERNEL CONTROLS</h3>
-                <form id="admin-action-form">
-                    <div class="input-group admin-input">
-                        <input type="text" id="admin-target-id" required placeholder=" ">
-                        <label>TARGET_BANK_ID</label>
-                    </div>
-                    <div class="input-group admin-input">
-                        <input type="number" id="admin-amount" step="0.01" placeholder=" ">
-                        <label>AMOUNT (CREDITS)</label>
-                    </div>
-                    <div class="admin-actions-grid">
-                        <button type="button" onclick="triggerAdminAction('give')" class="btn btn-gold">GIVE</button>
-                        <button type="button" onclick="triggerAdminAction('remove')" class="btn btn-red">REMOVE</button>
-                        <button type="button" onclick="triggerAdminAction('ban')" class="btn btn-red-neon">BAN</button>
-                        <button type="button" onclick="triggerAdminAction('unban')" class="btn btn-neon">UNBAN</button>
-                        <button type="button" onclick="triggerAdminAction('delete')" class="btn btn-delete">DELETE</button>
-                    </div>
-                </form>
-            </div>
-
-            <div class="card-history panel-glass admin-border full-width-admin">
-                <h3 class="section-title text-gold">👁️ GLOBAL MATRIX USERS REGISTRY</h3>
-                <div class="table-wrapper custom-scroll">
-                    <table class="admin-table">
-                        <thead>
-                            <tr>
-                                <th>BANK ID</th>
-                                <th>USERNAME</th>
-                                <th>BALANCE</th>
-                                <th>STATUS</th>
-                            </tr>
-                        </thead>
-                        <tbody id="admin-users-table"></tbody>
-                    </table>
-                </div>
-            </div>
-        </main>
-    </div>
-
-    <div id="ban-overlay" class="ban-overlay">
-        <div class="ban-card">
-            <h1 class="glitch-text" data-text="TERMINAL BLOCKED">TERMINAL BLOCKED</h1>
-            <p class="ban-alert-text">Your cyber-identity has been neutralized by the Network Overlord.</p>
-            <div class="neon-line-red"></div>
-            <p class="tech-code">ERROR_CODE: 0xBAN_UNAUTHORIZED_ACCESS</p>
-            <button class="btn btn-red-neon" onclick="closeBanOverlay()">ACKNOWLEDGE REJECTION</button>
         </div>
+
     </div>
 
-    <script src="database.js?v=999"></script>
-    <script src="script.js?v=999"></script>
+    <script src="database.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
