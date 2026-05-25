@@ -1,125 +1,136 @@
-/**
- * TRUSTIX KERNEL DATABASE INTERFACE (LocalStorage Virtual Simulation)
- */
+const SUPABASE_URL = "https://aunfrnyhbfcxgdfhvcox.supabase.co"; 
+const SUPABASE_KEY = "sb_publishable_8Xf1-4RnW0-f09idcW76vQ_JU5_Iqqe";
 
-const DB = {
-    getRawData: function() {
-        try {
-            let data = localStorage.getItem('trustix_matrix_db');
-            if (!data) {
-                const initialDB = {
-                    users: {
-                        "admin21": {
-                            username: "admin21",
-                            password: "admin210412",
-                            bankId: "MASTER_CORE",
-                            balance: Infinity,
-                            isBanned: false,
-                            isAdmin: true
-                        }
-                    },
-                    transactions: []
-                };
-                localStorage.setItem('trustix_matrix_db', JSON.stringify(initialDB));
-                return initialDB;
-            }
-            return JSON.parse(data);
-        } catch (e) {
-            console.error("Storage Matrix Error, creating fallback database", e);
-            return { users: {}, transactions: [] };
+const ADMIN_USERNAME = "admin21";
+const ADMIN_PASSWORD_CRYPT = "admin210412";
+
+async function supabaseFetch(endpoint, options = {}) {
+    const headers = {
+        "apikey": SUPABASE_KEY,
+        "Authorization": `Bearer ${SUPABASE_KEY}`,
+        "Content-Type": "application/json",
+        "Prefer": "return=representation"
+    };
+    const response = await fetch(`${SUPABASE_URL}/rest/v1/${endpoint}`, {
+        ...options,
+        headers: { ...headers, ...options.headers }
+    });
+    if (!response.ok) {
+        const errData = await response.json();
+        throw new Error(errData.message || "Ошибка базы данных");
+    }
+    return response.json();
+}
+
+window.CyberDB = {
+    async loginUser(username, password) {
+        if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD_CRYPT) {
+            return { username: ADMIN_USERNAME, role: 'admin', isAdmin: true };
         }
+        const users = await supabaseFetch(`users?username=eq.${encodeURIComponent(username)}&select=*`);
+        if (users.length === 0) throw new Error("Пользователь не найден");
+        const user = users[0];
+        if (user.is_banned) throw new Error(`TERMINAL_BANNED // CODE: ${user.ban_code}`);
+        if (user.password !== password) throw new Error("Неверный пароль");
+        return { ...user, role: 'user', isAdmin: false };
     },
 
-    saveRawData: function(data) {
-        try {
-            localStorage.setItem('trustix_matrix_db', JSON.stringify(data));
-        } catch (e) {
-            console.error("Failed to write to neural storage", e);
-        }
-    },
+    async registerUser(username, password) {
+        if (username.toLowerCase() === ADMIN_USERNAME) throw new Error("Имя зарезервировано");
+        if (username.length < 3) throw new Error("Имя слишком короткое");
+        const existing = await supabaseFetch(`users?username=eq.${encodeURIComponent(username)}&select=id`);
+        if (existing.length > 0) throw new Error("Этот логин уже занят");
 
-    findUser: function(username) {
-        const db = this.getRawData();
-        return db.users[username] || null;
-    },
-
-    findUserById: function(bankId) {
-        const db = this.getRawData();
-        return Object.values(db.users).find(u => u.bankId === bankId) || null;
-    },
-
-    createUser: function(username, password) {
-        const db = this.getRawData();
-        if (db.users[username]) return false;
-
-        let uniqueId;
-        while (true) {
-            uniqueId = Math.floor(10000000 + Math.random() * 90000000).toString();
-            if (!Object.values(db.users).some(u => u.bankId === uniqueId)) break;
-        }
-
-        db.users[username] = {
+        const techId = "TRX-" + Math.floor(100000 + Math.random() * 900000);
+        const newUser = {
             username: username,
             password: password,
-            bankId: uniqueId,
-            balance: 0.00,
-            isBanned: false,
-            isAdmin: false
+            tech_id: techId,
+            balance: 1000,
+            is_banned: false,
+            ban_code: ""
         };
-
-        this.saveRawData(db);
-        return db.users[username];
+        const created = await supabaseFetch("users", {
+            method: "POST",
+            body: JSON.stringify(newUser)
+        });
+        return created[0];
     },
 
-    updateBalance: function(bankId, newBalance) {
-        const db = this.getRawData();
-        const user = Object.values(db.users).find(u => u.bankId === bankId);
-        if (user) {
-            if (user.isAdmin) return; 
-            db.users[user.username].balance = parseFloat(newBalance);
-            this.saveRawData(db);
-        }
+    async getUserData(username) {
+        const users = await supabaseFetch(`users?username=eq.${encodeURIComponent(username)}&select=*`);
+        if (users.length === 0) return null;
+        return users[0];
     },
 
-    setBanStatus: function(bankId, status) {
-        const db = this.getRawData();
-        const user = Object.values(db.users).find(u => u.bankId === bankId);
-        if (user && !user.isAdmin) {
-            db.users[user.username].isBanned = status;
-            this.saveRawData(db);
-            return true;
-        }
-        return false;
+    async transferFunds(senderUsername, receiverUsername, amount) {
+        amount = parseFloat(amount);
+        if (isNaN(amount) || amount <= 0) throw new Error("Неверная сумма");
+        if (senderUsername === receiverUsername) throw new Error("Нельзя перевести себе");
+
+        const senderData = await this.getUserData(senderUsername);
+        if (!senderData || senderData.balance < amount) throw new Error("Недостаточно средств");
+
+        const receiverData = await this.getUserData(receiverUsername);
+        if (!receiverData) throw new Error("Получатель не найден");
+
+        await supabaseFetch(`users?username=eq.${encodeURIComponent(senderUsername)}`, {
+            method: "PATCH",
+            body: JSON.stringify({ balance: senderData.balance - amount })
+        });
+        await supabaseFetch(`users?username=eq.${encodeURIComponent(receiverUsername)}`, {
+            method: "PATCH",
+            body: JSON.stringify({ balance: receiverData.balance + amount })
+        });
+
+        await supabaseFetch("transactions", {
+            method: "POST",
+            body: JSON.stringify({
+                sender: senderUsername,
+                receiver: receiverUsername,
+                amount: amount,
+                timestamp: new Date().toLocaleTimeString()
+            })
+        });
+        return true;
     },
 
-    deleteUser: function(bankId) {
-        const db = this.getRawData();
-        const user = Object.values(db.users).find(u => u.bankId === bankId);
-        if (user && !user.isAdmin) {
-            delete db.users[user.username];
-            this.saveRawData(db);
-            return true;
-        }
-        return false;
+    async getTransactionHistory(username) {
+        return await supabaseFetch(`transactions?or=(sender.eq.${encodeURIComponent(username)},receiver.eq.${encodeURIComponent(username)})&order=id.desc&limit=20`);
     },
 
-    addTransaction: function(senderId, senderName, receiverId, receiverName, amount) {
-        const db = this.getRawData();
-        const newTx = {
-            id: 'TX-' + Math.random().toString(36).substr(2, 9).toUpperCase(),
-            timestamp: new Date().toLocaleString(),
-            senderId,
-            senderName,
-            receiverId,
-            receiverName,
-            amount: parseFloat(amount)
-        };
-        db.transactions.unshift(newTx);
-        this.saveRawData(db);
+    async getAllUsers() {
+        return await supabaseFetch("users?order=username.asc");
     },
 
-    getTransactionsForUser: function(bankId) {
-        const db = this.getRawData();
-        return db.transactions.filter(tx => tx.senderId === bankId || tx.receiverId === bankId);
+    async updateBalance(username, newBalance) {
+        await supabaseFetch(`users?username=eq.${encodeURIComponent(username)}`, {
+            method: "PATCH",
+            body: JSON.stringify({ balance: parseFloat(newBalance) })
+        });
+        return true;
+    },
+
+    async banUser(username, banCode) {
+        await supabaseFetch(`users?username=eq.${encodeURIComponent(username)}`, {
+            method: "PATCH",
+            body: JSON.stringify({ is_banned: true, ban_code: banCode })
+        });
+        return true;
+    },
+
+    async unbanUser(username) {
+        await supabaseFetch(`users?username=eq.${encodeURIComponent(username)}`, {
+            method: "PATCH",
+            body: JSON.stringify({ is_banned: false, ban_code: "" })
+        });
+        return true;
+    },
+
+    async deleteUser(username) {
+        await supabaseFetch(`users?username=eq.${encodeURIComponent(username)}`, {
+            method: "DELETE"
+        });
+        return true;
     }
 };
