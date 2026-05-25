@@ -1,5 +1,4 @@
-// Ждем полной загрузки страницы
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     // ЭЛЕМЕНТЫ ИНТЕРФЕЙСА
     const authScreen = document.getElementById('auth-screen');
     const appScreen = document.getElementById('app-screen');
@@ -24,6 +23,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let currentUser = null;
 
+    // ПРИНУДИТЕЛЬНО ПОКАЗЫВАЕМ ЭКРАН ВХОДА ПРИ СТАРТЕ
+    if (authScreen) {
+        authScreen.classList.remove('hidden');
+    }
+
     // ФУНКЦИЯ ОБНОВЛЕНИЯ ЭКРАНА ПОЛЬЗОВАТЕЛЯ
     async function updateDashboard() {
         if (!currentUser) return;
@@ -31,30 +35,33 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await window.CyberDB.getUserData(currentUser.username);
             if (!data) return;
             
-            userBalance.textContent = parseFloat(data.balance).toFixed(2);
-            userTechId.textContent = data.tech_id;
-            userLoginName.textContent = data.username;
+            if(userBalance) userBalance.textContent = parseFloat(data.balance).toFixed(2);
+            if(userTechId) userTechId.textContent = data.tech_id;
+            if(userLoginName) userLoginName.textContent = data.username;
 
             // Загружаем историю
             const txs = await window.CyberDB.getTransactionHistory(data.username);
-            historyList.innerHTML = '';
-            txs.forEach(tx => {
-                const li = document.createElement('li');
-                li.className = 'history-item';
-                const isSender = tx.sender === data.username;
-                li.innerHTML = `
-                    <span>${isSender ? '➡️ ВЫВОД' : '⬅️ ЗАЧИСЛЕНИЕ'} // ${isSender ? tx.receiver : tx.sender}</span>
-                    <span style="color: ${isSender ? '#ff5555' : '#00ff66'}">${isSender ? '-' : '+'}${tx.amount} ¤</span>
-                `;
-                historyList.appendChild(li);
-            });
+            if (historyList) {
+                historyList.innerHTML = '';
+                txs.forEach(tx => {
+                    const li = document.createElement('li');
+                    li.className = 'history-item';
+                    const isSender = tx.sender === data.username;
+                    li.innerHTML = `
+                        <span>${isSender ? '➡️ ВЫВОД' : '⬅️ ЗАЧИСЛЕНИЕ'} // ${isSender ? tx.receiver : tx.sender}</span>
+                        <span style="color: ${isSender ? '#ff5555' : '#00ff66'}">${isSender ? '-' : '+'}${tx.amount} ¤</span>
+                    `;
+                    historyList.appendChild(li);
+                });
+            }
         } catch (err) {
-            alert("Ошибка обновления данных: " + err.message);
+            console.error("Ошибка обновления данных: ", err);
         }
     }
 
     // ФУНКЦИЯ ОБНОВЛЕНИЯ ПАНЕЛИ АДМИНА
     async function updateAdminPanel() {
+        if (!adminUsersList) return;
         try {
             const users = await window.CyberDB.getAllUsers();
             adminUsersList.innerHTML = '';
@@ -76,7 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 adminUsersList.appendChild(div);
             });
         } catch (err) {
-            alert("Ошибка админ-панели: " + err.message);
+            console.error("Ошибка админ-панели: ", err);
         }
     }
 
@@ -106,65 +113,75 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // ОБРАБОТЧИКИ КНОПОК
-    loginBtn.addEventListener('click', async () => {
-        const user = usernameInput.value.trim();
-        const pass = passwordInput.value.trim();
-        if(!user || !pass) return alert("Заполните поля!");
+    if (loginBtn) {
+        loginBtn.addEventListener('click', async () => {
+            const user = usernameInput.value.trim();
+            const pass = passwordInput.value.trim();
+            if(!user || !pass) return alert("Заполните поля!");
 
-        try {
-            const res = await window.CyberDB.loginUser(user, pass);
-            currentUser = res;
-            authScreen.classList.add('hidden');
-            if (res.isAdmin) {
-                adminScreen.classList.remove('hidden');
-                updateAdminPanel();
-            } else {
-                appScreen.classList.remove('hidden');
-                updateDashboard();
+            try {
+                const res = await window.CyberDB.loginUser(user, pass);
+                currentUser = res;
+                authScreen.classList.add('hidden');
+                if (res.isAdmin) {
+                    adminScreen.classList.remove('hidden');
+                    updateAdminPanel();
+                } else {
+                    appScreen.classList.remove('hidden');
+                    updateDashboard();
+                }
+            } catch(err) {
+                alert(err.message);
             }
-        } catch(err) {
-            alert(err.message);
-        }
-    });
+        });
+    }
 
-    registerBtn.addEventListener('click', async () => {
-        const user = usernameInput.value.trim();
-        const pass = passwordInput.value.trim();
-        if(!user || !pass) return alert("Заполните поля!");
+    if (registerBtn) {
+        registerBtn.addEventListener('click', async () => {
+            const user = usernameInput.value.trim();
+            const pass = passwordInput.value.trim();
+            if(!user || !pass) return alert("Заполните поля!");
 
-        try {
-            await window.CyberDB.registerUser(user, pass);
-            alert("Регистрация успешна! Теперь воспользуйтесь кнопкой ВХОД.");
-        } catch(err) {
-            alert(err.message);
-        }
-    });
+            try {
+                await window.CyberDB.registerUser(user, pass);
+                alert("Регистрация успешна! Теперь воспользуйтесь кнопкой ВХОД.");
+            } catch(err) {
+                alert(err.message);
+            }
+        });
+    }
 
-    sendBtn.addEventListener('click', async () => {
-        const target = targetUserInput.value.trim();
-        const amount = parseFloat(transferAmountInput.value);
-        if(!target || isNaN(amount) || amount <= 0) return alert("Неверные данные перевода");
+    if (sendBtn) {
+        sendBtn.addEventListener('click', async () => {
+            const target = targetUserInput.value.trim();
+            const amount = parseFloat(transferAmountInput.value);
+            if(!target || isNaN(amount) || amount <= 0) return alert("Неверные данные перевода");
 
-        try {
-            await window.CyberDB.transferFunds(currentUser.username, target, amount);
-            alert("Перевод успешно выполнен!");
-            targetUserInput.value = '';
-            transferAmountInput.value = '';
-            updateDashboard();
-        } catch(err) {
-            alert(err.message);
-        }
-    });
+            try {
+                await window.CyberDB.transferFunds(currentUser.username, target, amount);
+                alert("Перевод успешно выполнен!");
+                targetUserInput.value = '';
+                transferAmountInput.value = '';
+                updateDashboard();
+            } catch(err) {
+                alert(err.message);
+            }
+        });
+    }
 
-    logoutBtn.addEventListener('click', () => {
-        currentUser = null;
-        appScreen.classList.add('hidden');
-        authScreen.classList.remove('hidden');
-    });
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', () => {
+            currentUser = null;
+            appScreen.classList.add('hidden');
+            authScreen.classList.remove('hidden');
+        });
+    }
 
-    adminLogoutBtn.addEventListener('click', () => {
-        currentUser = null;
-        adminScreen.classList.add('hidden');
-        authScreen.classList.remove('hidden');
-    });
+    if (adminLogoutBtn) {
+        adminLogoutBtn.addEventListener('click', () => {
+            currentUser = null;
+            adminScreen.classList.add('hidden');
+            authScreen.classList.remove('hidden');
+        });
+    }
 });
