@@ -11,10 +11,14 @@ async function supabaseFetch(endpoint, options = {}) {
         "Content-Type": "application/json",
         "Prefer": "return=representation"
     };
+    
+    // ДОБАВЛЯЕМ ОБЯЗАТЕЛЬНЫЕ НАСТРОЙКИ БЕЗОПАСНОСТИ ДЛЯ БРАУЗЕРОВ
     const response = await fetch(`${SUPABASE_URL}/rest/v1/${endpoint}`, {
         ...options,
+        mode: 'cors', // Разрешает запросы между разными сайтами (Render -> Supabase)
         headers: { ...headers, ...options.headers }
     });
+    
     if (!response.ok) {
         const errData = await response.json();
         throw new Error(errData.message || "Ошибка базы данных");
