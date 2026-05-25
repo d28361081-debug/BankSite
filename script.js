@@ -1,4 +1,5 @@
 let currentUser = null;
+let particleSystem = null; // Глобальная переменная для перекрашивания частиц 3D сферы
 
 // ==========================================
 // THREE.JS 3D ENGINE (CINEMATIC PLANET)
@@ -38,11 +39,11 @@ function init3DEngine() {
     
     const particlesMat = new THREE.PointsMaterial({
         size: 0.04,
-        color: 0x00ff66,
+        color: 0x00ff66, // Базовый зеленый цвет частиц
         transparent: true,
         opacity: 0.4
     });
-    const particleSystem = new THREE.Points(particlesGeo, particlesMat);
+    particleSystem = new THREE.Points(particlesGeo, particlesMat);
     scene.add(particleSystem);
 
     const dirLight = new THREE.DirectionalLight(0x00ff66, 1.5);
@@ -69,7 +70,55 @@ function init3DEngine() {
 }
 
 // ==========================================
-// UI INTERACTIONS & VISUALS
+// NEW: CYBER NOTIFICATION FRAMEWORK (КРАСНЫЕ КВАДРАТЫ)
+// ==========================================
+function showCyberAlert(type, title, message) {
+    const zone = document.getElementById('cyber-notification-zone');
+    if (!zone) return;
+
+    const alertBox = document.createElement('div');
+    alertBox.className = `cyber-alert ${type === 'success' ? 'cyber-alert-success' : 'cyber-alert-error'}`;
+    
+    alertBox.innerHTML = `
+        <div class="alert-title">// ${title.toUpperCase()}</div>
+        <div class="alert-desc">${message}</div>
+    `;
+
+    zone.appendChild(alertBox);
+
+    // Удаление ошибки через 4 секунды с плавным исчезновением
+    setTimeout(() => {
+        alertBox.style.transition = "opacity 0.4s ease, transform 0.4s ease";
+        alertBox.style.opacity = "0";
+        alertBox.style.transform = "translateX(50px)";
+        setTimeout(() => alertBox.remove(), 400);
+    }, 4000);
+}
+
+// ==========================================
+// NEW: REALTIME THEME CHANGER MATRIX
+// ==========================================
+function changeMatrixTheme(themeName, element) {
+    // Смена класса на body
+    document.body.className = '';
+    if (themeName !== 'green') {
+        document.body.classList.add(`theme-${themeName}`);
+    }
+
+    // Переключение галочки (активной точки) в меню
+    document.querySelectorAll('.theme-dot').forEach(dot => dot.classList.remove('active'));
+    element.classList.add('active');
+
+    // Перекрашивание 3D частиц сферы под цвет темы
+    if (particleSystem) {
+        if (themeName === 'green') particleSystem.material.color.setHex(0x00ff66);
+        if (themeName === 'cyan') particleSystem.material.color.setHex(0x00f0ff);
+        if (themeName === 'pink') particleSystem.material.color.setHex(0xff00ff);
+    }
+}
+
+// ==========================================
+// UI INTERACTIONS
 // ==========================================
 function setupUIEffects() {
     setTimeout(() => {
@@ -104,21 +153,15 @@ function switchAuthTab(tab) {
 
 function showActivePanel(panelId) {
     const allPanels = document.querySelectorAll('.panel');
-    allPanels.forEach(panel => {
-        panel.classList.remove('active');
-    });
+    allPanels.forEach(panel => panel.classList.remove('active'));
 
     const targetPanel = document.getElementById(panelId);
-    if (targetPanel) {
-        targetPanel.classList.add('active');
-    }
+    if (targetPanel) targetPanel.classList.add('active');
 }
 
 // ==========================================
-// СТРОГАЯ ЛОГИКА АВТОРИЗАЦИИ И РЕГИСТРАЦИИ
+// REAL-TIME AUTHENTICATION (SUPABASE)
 // ==========================================
-
-// 1. РЕГИСТРАЦИЯ (Не создает аккаунт, если Username уже занят)
 async function handleRegister(e) {
     e.preventDefault();
     const user = document.getElementById('reg-username').value.trim();
@@ -126,11 +169,10 @@ async function handleRegister(e) {
     const repeat = document.getElementById('reg-repeat').value;
 
     if (pass !== repeat) {
-        return alert("SECURITY ERROR: Passwords absolute mismatch.");
+        return showCyberAlert('error', 'SECURITY ERROR', 'Passwords absolute mismatch.');
     }
 
     try {
-        // Проверяем, существует ли уже такой Username в базе данных
         const { data: existingUser, error: checkError } = await _supabase
             .from('users')
             .select('username')
@@ -140,10 +182,9 @@ async function handleRegister(e) {
         if (checkError) throw checkError;
 
         if (existingUser) {
-            return alert("REGISTRATION FAILED: Username already operational within Net Matrix.");
+            return showCyberAlert('error', 'REGISTRATION FAILED', 'Username already operational within Net Matrix.');
         }
 
-        // Если всё чисто — генерируем ID и создаем аккаунт со стартовым балансом 0
         const generatedBankId = Math.floor(10000000 + Math.random() * 90000000).toString();
 
         const { error: insertError } = await _supabase
@@ -152,34 +193,30 @@ async function handleRegister(e) {
 
         if (insertError) throw insertError;
 
-        alert(`ACCESS GRANTED. Account registered! Your Core Bank ID is: ${generatedBankId}`);
+        showCyberAlert('success', 'ACCESS GRANTED', `Registered! Core Bank ID: ${generatedBankId}`);
         switchAuthTab('login');
 
     } catch (err) {
-        console.error(err);
-        alert("CRITICAL DATABASE ERROR: Could not process registration.");
+        showCyberAlert('error', 'DATABASE CRASH', 'Could not sync node with registry database.');
     }
 }
 
-// 2. ВХОД (Ищет совпадения, никогда не создает новые профили)
 async function handleLogin(e) {
     e.preventDefault();
     const user = document.getElementById('login-username').value.trim();
     const pass = document.getElementById('login-password').value;
 
-    // Хардкорный бэкдор для админа (сверяет строго заданный пароль)
     if (user === 'admin21') {
         if (pass === 'admin210412') {
             currentUser = { username: 'admin21', bank_id: '99999999', balance: 999999999, is_admin: true, is_banned: false };
             initAdminDashboard();
             return;
         } else {
-            return alert("ACCESS DENIED: Invalid encryption credentials.");
+            return showCyberAlert('error', 'CORRUPTION DETECTED', 'Invalid encryption key for ADMIN node.');
         }
     }
 
     try {
-        // Запрашиваем пользователя, у которого совпадают и Логин, и Пароль
         const { data, error } = await _supabase
             .from('users')
             .select('*')
@@ -189,19 +226,16 @@ async function handleLogin(e) {
 
         if (error) throw error;
 
-        // Если база пустая или связка логин/пароль не найдена — ЖЕСТКИЙ ОТКАЗ
         if (!data) {
-            return alert("ACCESS DENIED: Invalid username or encryption password.");
+            return showCyberAlert('error', 'ACCESS DENIED', 'Invalid username or encryption password.');
         }
 
-        // Проверка на бан
         if (data.is_banned) {
             return showActivePanel('ban-panel');
         }
 
         currentUser = data;
 
-        // Распределение по панелям
         if (data.is_admin === true) {
             initAdminDashboard();
         } else {
@@ -209,8 +243,7 @@ async function handleLogin(e) {
         }
 
     } catch (err) {
-        console.error(err);
-        alert("CONNECTION ERROR: Secure database link is offline.");
+        showCyberAlert('error', 'LINK OFFLINE', 'Secure database link is currently unestablished.');
     }
 }
 
@@ -222,7 +255,6 @@ function initUserDashboard() {
     document.getElementById('user-display-name').innerText = currentUser.username.toUpperCase();
     document.getElementById('user-bank-id').innerText = currentUser.bank_id;
     document.getElementById('user-balance').innerText = `${parseFloat(currentUser.balance).toFixed(2)} ฿`;
-    
     loadTransactionHistory();
 }
 
@@ -254,7 +286,7 @@ async function loadTransactionHistory() {
                     <p style="font-weight:700;">${isIncoming ? '← NET_INFLOW' : '→ NET_OUTFLOW'}</p>
                     <small style="color:#64748b;">${isIncoming ? 'From: ' + tx.sender_id : 'To: ' + tx.receiver_id}</small>
                 </div>
-                <span style="font-family:'Orbitron'; font-weight:700; color: ${isIncoming ? 'var(--neon-green)' : 'var(--neon-red)'}">
+                <span style="font-family:'Orbitron'; font-weight:700; color: ${isIncoming ? 'var(--neon-accent)' : 'var(--neon-red)'}">
                     ${isIncoming ? '+' : '-'}${parseFloat(tx.amount).toFixed(2)} ฿
                 </span>
             `;
@@ -271,10 +303,10 @@ async function handleTransfer(e) {
     const amount = parseFloat(document.getElementById('transfer-amount').value);
 
     if (destId === currentUser.bank_id) {
-        return alert("ERROR: Cannot loop transactions back into self node.");
+        return showCyberAlert('error', 'LOOP ERROR', 'Cannot loop transactions back into self node.');
     }
     if (amount > currentUser.balance) {
-        return alert("QUANTUM REFUSAL: Insufficient balance credits.");
+        return showCyberAlert('error', 'QUANTUM REFUSAL', 'Insufficient balance credits.');
     }
 
     try {
@@ -285,7 +317,7 @@ async function handleTransfer(e) {
             .maybeSingle();
 
         if (rErr || !receiver) {
-            return alert("NODE NOT FOUND: Targeted Bank ID does not exist in Network.");
+            return showCyberAlert('error', 'NODE ERROR', 'Targeted Bank ID does not exist in Network.');
         }
 
         const newSenderBal = parseFloat(currentUser.balance) - amount;
@@ -293,21 +325,18 @@ async function handleTransfer(e) {
 
         await _supabase.from('users').update({ balance: newSenderBal }).eq('id', currentUser.id);
         await _supabase.from('users').update({ balance: newRecBal }).eq('id', receiver.id);
-        
-        await _supabase.from('transactions').insert([
-            { sender_id: currentUser.bank_id, receiver_id: destId, amount: amount }
-        ]);
+        await _supabase.from('transactions').insert([{ sender_id: currentUser.bank_id, receiver_id: destId, amount: amount }]);
 
         currentUser.balance = newSenderBal;
-        alert("CREDIT TRANSFER EXECUTED SUCCESSFULLY.");
+        showCyberAlert('success', 'SUCCESS', 'Credit transfer executed successfully.');
         initUserDashboard();
     } catch (err) {
-        alert("TRANSACTION ERROR: Server rejected the transfer block.");
+        showCyberAlert('error', 'FATAL EXCEPTION', 'Server rejected the transaction block.');
     }
 }
 
 // ==========================================
-// ADMIN CONTROL MATRIX
+// ADMIN CONTROL MATRIX & NEW TERMINATE FUNCTION
 // ==========================================
 async function initAdminDashboard() {
     showActivePanel('admin-dashboard');
@@ -325,8 +354,9 @@ async function initAdminDashboard() {
             tr.innerHTML = `
                 <td>${u.username}</td>
                 <td style="font-family:'Orbitron';">${u.bank_id}</td>
-                <td style="color:var(--neon-green); font-weight:bold;">${parseFloat(u.balance).toFixed(2)} ฿</td>
-                <td style="color: ${u.is_banned ? 'var(--neon-red)' : 'var(--neon-green)'}">${u.is_banned ? 'BANNED' : 'OPERATIONAL'}</td>
+                <td style="color:var(--neon-accent); font-weight:bold;">${parseFloat(u.balance).toFixed(2)} ฿</td>
+                <td style="color: ${u.is_banned ? 'var(--neon-red)' : 'var(--neon-accent)'}">${u.is_banned ? 'BANNED' : 'OPERATIONAL'}</td>
+                <td><button class="terminate-btn" onclick="terminateUserNode('${u.bank_id}')">DELETE</button></td>
             `;
             tbody.appendChild(tr);
         });
@@ -335,16 +365,39 @@ async function initAdminDashboard() {
     }
 }
 
+// NEW: Полное удаление аккаунта администратором из базы данных
+async function terminateUserNode(bankId) {
+    if (!confirm(`// WARNING: Are you sure you want to completely erase Node [${bankId}] from matrix history?`)) {
+        return;
+    }
+
+    try {
+        // Каскадно очищаем или удаляем записи в Supabase
+        const { error } = await _supabase
+            .from('users')
+            .delete()
+            .eq('bank_id', bankId);
+
+        if (error) throw error;
+
+        showCyberAlert('success', 'NODE PURGED', `Account node [${bankId}] has been completely deleted.`);
+        initAdminDashboard(); // Обновляем таблицу на экране
+
+    } catch (err) {
+        showCyberAlert('error', 'PURGE REFUSED', 'Database rejected node deletion command.');
+    }
+}
+
 async function executeAdminAction(action) {
     const targetId = document.getElementById('admin-target-id').value.trim();
     const amount = parseFloat(document.getElementById('admin-amount').value) || 0;
 
-    if(!targetId) return alert("ADMIN SPECIFICATION ERROR: Target ID required.");
+    if(!targetId) return showCyberAlert('error', 'ADMIN SPECIFICATION', 'Target ID required.');
 
     try {
         const { data: targetUser, error } = await _supabase.from('users').select('*').eq('bank_id', targetId).maybeSingle();
         if(error || !targetUser) {
-            return alert("TARGET NODE INVALID: User not found.");
+            return showCyberAlert('error', 'TARGET NODE', 'User not found.');
         }
 
         if (action === 'give' && amount > 0) {
@@ -358,10 +411,10 @@ async function executeAdminAction(action) {
             await _supabase.from('users').update({ is_banned: false }).eq('bank_id', targetId);
         }
 
-        alert(`ADMIN ACTION [${action.toUpperCase()}] ENGAGED ON NODE ${targetId}`);
+        showCyberAlert('success', 'ACTION EXECUTED', `Admin action [${action.toUpperCase()}] engaged on node ${targetId}`);
         initAdminDashboard();
     } catch (err) {
-        alert("ADMIN ACTION REFUSED BY DATABASE.");
+        showCyberAlert('error', 'CRITICAL REFUSAL', 'Admin action refused by database.');
     }
 }
 
