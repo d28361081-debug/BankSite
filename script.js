@@ -1,7 +1,6 @@
 let currentUser = null;
 let currentTheme = 'green';
 
-// Настройки цветовых схем
 const SYSTEM_THEMES = {
     green: { color: 0x00ff66, emissive: 0x052211, accent: '#00ff66', glow: 'rgba(0, 255, 102, 0.35)' },
     blue: { color: 0x00d9ff, emissive: 0x001133, accent: '#00d9ff', glow: 'rgba(0, 217, 255, 0.35)' },
@@ -9,6 +8,30 @@ const SYSTEM_THEMES = {
 };
 
 let earthMesh, earthMaterial, directionalLight;
+
+// ==========================================
+// ДВИЖОК НЕОНОВЫХ КИБЕР-УВЕДОМЛЕНИЙ
+// ==========================================
+function showCyberToast(type, header, message) {
+    const container = document.getElementById('notification-container');
+    if (!container) return;
+
+    const toast = document.createElement('div');
+    toast.className = `cyber-toast ${type}`; // type: 'success' или 'error'
+    
+    toast.innerHTML = `
+        <div class="toast-header">// ${header.toUpperCase()}</div>
+        <div class="toast-msg">${message}</div>
+    `;
+
+    container.appendChild(toast);
+
+    // Автоматическое удаление через 4 секунды с анимацией ухода
+    setTimeout(() => {
+        toast.style.animation = 'toastOut 0.4s cubic-bezier(0.55, 0.085, 0.68, 0.53) forwards';
+        setTimeout(() => toast.remove(), 400);
+    }, 4000);
+}
 
 // ==========================================
 // 3D СФЕРА BACKGROUND
@@ -56,40 +79,48 @@ function initGlobal3D() {
     });
 }
 
-// ==========================================
-// СИНХРОННОЕ ПЕРЕКЛЮЧЕНИЕ ТЕМЫ
-// ==========================================
+// ПЕРЕКЛЮЧЕНИЕ ТЕМЫ (ПЕРЕКРАСКА ЦИФР И ИНДИКАТОРОВ)
 function switchSystemTheme(themeName) {
     if (!SYSTEM_THEMES[themeName]) return;
     currentTheme = themeName;
     const theme = SYSTEM_THEMES[themeName];
 
-    // Изменение параметров 3D сцены
     if (earthMaterial && directionalLight) {
         earthMaterial.color.setHex(theme.color);
         earthMaterial.emissive.setHex(theme.emissive);
         directionalLight.color.setHex(theme.color);
     }
 
-    // Внедрение CSS переменных на всю страницу
     document.documentElement.style.setProperty('--neon-color', theme.accent);
     document.documentElement.style.setProperty('--neon-glow', theme.glow);
 
     const cursor = document.getElementById('cursor-glow');
     if (cursor) cursor.style.background = `radial-gradient(circle, ${theme.glow.replace('0.35', '0.1')} 0%, rgba(0,0,0,0) 70%)`;
 
-    // Синхронизация точек выбора темы во всех панелях
     document.querySelectorAll('.dot').forEach(dot => {
         dot.classList.remove('active');
         if (dot.classList.contains(themeName)) {
             dot.classList.add('active');
         }
     });
+
+    const bankIdText = document.getElementById('user-bank-id');
+    if (bankIdText) bankIdText.style.color = theme.accent;
+
+    const userBadge = document.getElementById('user-badge');
+    if (userBadge) {
+        userBadge.style.borderColor = theme.accent;
+        userBadge.style.color = theme.accent;
+        userBadge.style.boxShadow = `inset 0 0 6px ${theme.glow}`;
+    }
+
+    const avatar = document.getElementById('user-avatar');
+    if (avatar) {
+        avatar.style.borderColor = theme.accent;
+        avatar.style.background = `radial-gradient(circle, ${theme.glow} 0%, transparent 70%)`;
+    }
 }
 
-// ==========================================
-// НАВИГАЦИЯ И ИНТЕРФЕЙС
-// ==========================================
 function showActivePanel(panelId) {
     document.querySelectorAll('.panel').forEach(p => {
         p.classList.remove('active');
@@ -122,20 +153,22 @@ function switchAuthTab(tab) {
     }
 }
 
-// ==========================================
-// АВТОРИЗАЦИЯ И РЕГИСТРАЦИЯ (БАЗА ДАННЫХ)
-// ==========================================
+// РЕГИСТРАЦИЯ
 async function handleRegister(e) {
     e.preventDefault();
     const username = document.getElementById('reg-username').value.trim();
     const pass = document.getElementById('reg-password').value;
     const repeat = document.getElementById('reg-repeat').value;
 
-    if (pass !== repeat) return alert("ACCESS ERROR: Encryption keys do not match.");
+    if (pass !== repeat) {
+        return showCyberToast('error', 'security encryption key error', 'Encryption keys do not match.');
+    }
 
     try {
         const { data: userExists } = await _supabase.from('users').select('username').eq('username', username).maybeSingle();
-        if (userExists) return alert("DENIED: Username signature already assigned.");
+        if (userExists) {
+            return showCyberToast('error', 'access denied', 'Username signature already assigned to grid.');
+        }
 
         const generatedBankId = Math.floor(10000000 + Math.random() * 90000000).toString();
 
@@ -143,49 +176,52 @@ async function handleRegister(e) {
             { username: username, password_hash: pass, bank_id: generatedBankId, balance: 0.00 }
         ]);
 
-        alert(`NODE INITIALIZED. Generated Core Bank ID: ${generatedBankId}`);
+        showCyberToast('success', 'node initialized', `Generated Core Bank ID: ${generatedBankId}`);
         switchAuthTab('login');
     } catch (err) {
-        alert("MAINFRAME ERROR: Registration rejected.");
+        showCyberToast('error', 'mainframe failure', 'Registration transaction rejected.');
     }
 }
 
+// АВТОРИЗАЦИЯ
 async function handleLogin(e) {
     e.preventDefault();
     const username = document.getElementById('login-username').value.trim();
     const pass = document.getElementById('login-password').value;
 
-    // Хардкод рут-доступа админа
     if (username === 'admin21' && pass === 'admin210412') {
         currentUser = { username: 'admin21', bank_id: '99999999', balance: 0, is_admin: true };
+        showCyberToast('success', 'root override activated', 'Welcome back, Overlord.');
         initAdminDashboard();
         return;
     }
 
     try {
         const { data: user, error } = await _supabase.from('users').select('*').eq('username', username).eq('password_hash', pass).maybeSingle();
-        if (error || !user) return alert("INVALID ACCESS KEY OR IDENTIFIER.");
+        if (error || !user) {
+            return showCyberToast('error', 'access gateway failure', 'Invalid key or identifier.');
+        }
         if (user.is_banned) return showActivePanel('ban-panel');
 
         currentUser = user;
+        showCyberToast('success', 'handshake success', `Session established for node: ${username.toUpperCase()}`);
+        
         if (user.is_admin) {
             initAdminDashboard();
         } else {
             initUserDashboard();
         }
     } catch (err) {
-        alert("LINK OFFLINE: Mainframe connection error.");
+        showCyberToast('error', 'grid connection offline', 'Database uplink failure.');
     }
 }
 
-// ==========================================
-// ОПЕРАЦИИ ПОЛЬЗОВАТЕЛЯ И ТРАНЗАКЦИИ
-// ==========================================
 function initUserDashboard() {
     showActivePanel('user-dashboard');
     document.getElementById('user-display-name').innerText = currentUser.username.toUpperCase();
     document.getElementById('user-bank-id').innerText = currentUser.bank_id;
     document.getElementById('user-balance').innerText = `${parseFloat(currentUser.balance).toFixed(2)} LMT`;
+    switchSystemTheme(currentTheme); 
     loadLedgerHistory();
 }
 
@@ -225,17 +261,24 @@ async function loadLedgerHistory() {
     }
 }
 
+// ТРАНЗАКЦИИ ПОЛЬЗОВАТЕЛЯ
 async function handleTransfer(e) {
     e.preventDefault();
     const destBankId = document.getElementById('transfer-id').value.trim();
     const amount = parseFloat(document.getElementById('transfer-amount').value);
 
-    if (destBankId === currentUser.bank_id) return alert("LOOP ERROR: Cannot transfer to yourself.");
-    if (amount > currentUser.balance) return alert("QUANTUM FAILURE: Insufficient liquidity.");
+    if (destBankId === currentUser.bank_id) {
+        return showCyberToast('error', 'loop logic error', 'Cannot transfer liquidity to yourself.');
+    }
+    if (amount > currentUser.balance) {
+        return showCyberToast('error', 'quantum asset failure', 'Insufficient node balance.');
+    }
 
     try {
         const { data: receiver } = await _supabase.from('users').select('*').eq('bank_id', destBankId).maybeSingle();
-        if (!receiver) return alert("TARGET NODE NOT FOUND IN GRID.");
+        if (!receiver) {
+            return showCyberToast('error', 'node mismatch', 'Target node ID not found in global grid.');
+        }
 
         const senderFinalBal = parseFloat(currentUser.balance) - amount;
         const receiverFinalBal = parseFloat(receiver.balance) + amount;
@@ -245,18 +288,17 @@ async function handleTransfer(e) {
         await _supabase.from('transactions').insert([{ sender_id: currentUser.bank_id, receiver_id: destBankId, amount: amount }]);
 
         currentUser.balance = senderFinalBal;
-        alert("TRANSACTION BLOCK ATTESTED.");
+        showCyberToast('success', 'ledger entry secure', `Transferred ${amount.toFixed(2)} LMT successfully.`);
         initUserDashboard();
     } catch (err) {
-        alert("TRANSACTION CRASHED.");
+        showCyberToast('error', 'transaction crash', 'Mainframe rejected the transaction payload.');
     }
 }
 
-// ==========================================
-// СУПЕР-АДМИНКА И ПОЛНОЕ УДАЛЕНИЕ (PURGE)
-// ==========================================
+// АДМИНКА
 async function initAdminDashboard() {
     showActivePanel('admin-dashboard');
+    switchSystemTheme(currentTheme);
     const tableBody = document.getElementById('admin-user-table');
     if (!tableBody) return;
 
@@ -287,11 +329,11 @@ async function executeAdminAction(action) {
     const target = document.getElementById('admin-target-id').value.trim();
     const amount = parseFloat(document.getElementById('admin-amount').value) || 0;
 
-    if (!target) return alert("TARGET NODE ID UNASSIGNED.");
+    if (!target) return showCyberToast('error', 'override error', 'Target Node ID unassigned.');
 
     try {
         const { data: user } = await _supabase.from('users').select('*').eq('bank_id', target).maybeSingle();
-        if (!user) return alert("NODE DOES NOT EXIST.");
+        if (!user) return showCyberToast('error', 'override error', 'Node code does not exist.');
 
         if (action === 'give') {
             await _supabase.from('users').update({ balance: parseFloat(user.balance) + amount }).eq('bank_id', target);
@@ -303,28 +345,29 @@ async function executeAdminAction(action) {
             await _supabase.from('users').update({ is_banned: false }).eq('bank_id', target);
         }
 
-        alert(`EXECUTION PROTOCOL [${action.toUpperCase()}] COMPLETE.`);
+        showCyberToast('success', 'protocol deployed', `Execution [${action.toUpperCase()}] applied successfully.`);
         initAdminDashboard();
     } catch (e) {
-        alert("OVERRIDE COMMAND FAILED.");
+        showCyberToast('error', 'command failure', 'Override command was intercepted and failed.');
     }
 }
 
 async function purgeUserNode(bankId, username) {
-    const verify = confirm(`WARNING // OVERLORD PURGE REQUESTED:\nAre you sure you want to completely erase "${username}" (${bankId}) from database mainframes? This cannot be undone.`);
+    const verify = confirm(`WARNING // OVERLORD PURGE REQUESTED:\nAre you sure you want to completely erase "${username}" (${bankId})?`);
     if (!verify) return;
 
     try {
         await _supabase.from('users').delete().eq('bank_id', bankId);
-        alert("NODE SUCCESSFULLY PURGED.");
+        showCyberToast('success', 'purge complete', 'Node signature destroyed permanently.');
         initAdminDashboard();
     } catch (err) {
-        alert("PURGE OPERATION ERRORED.");
+        showCyberToast('error', 'purge error', 'Operation failed.');
     }
 }
 
 function logout() {
     currentUser = null;
+    showCyberToast('success', 'session closed', 'Node disconnected from mainframe.');
     showActivePanel('auth-panel');
 }
 
@@ -336,8 +379,18 @@ window.addEventListener('mousemove', (e) => {
     }
 });
 
+// ЗАПУСК С ЭКРАНОМ ЗАГРУЗКИ
 window.onload = () => {
     initGlobal3D();
-    showActivePanel('auth-panel');
     switchSystemTheme('green');
+    
+    // Имитация чтения системных логов перед скрытием лоадера
+    setTimeout(() => {
+        const loader = document.getElementById('loader-overlay');
+        if (loader) {
+            loader.style.opacity = '0';
+            loader.style.visibility = 'hidden';
+        }
+        showActivePanel('auth-panel');
+    }, 2200);
 };
