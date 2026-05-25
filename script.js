@@ -68,6 +68,7 @@ function init3DEngine() {
         camera.aspect = window.innerWidth / window.innerHeight;
         camera.updateProjectionMatrix();
         renderer.setSize(window.innerWidth, window.innerHeight);
+        applyMobileLayoutUpdates(); // Коррекция при смене экрана
     });
 }
 
@@ -126,7 +127,7 @@ function changeMatrixTheme(themeName, element) {
 }
 
 // ==========================================
-// UI INTERACTIONS
+// UI & MOBILE CENTRALIZATION LOGIC
 // ==========================================
 function setupUIEffects() {
     setTimeout(() => {
@@ -144,6 +145,33 @@ function setupUIEffects() {
             cursor.style.top = e.clientY + 'px';
         });
     }
+    applyMobileLayoutUpdates();
+}
+
+function applyMobileLayoutUpdates() {
+    const isMobile = window.innerWidth <= 480;
+    const disconnectBtn = document.querySelector('.cyber-btn.red-glow[onclick="logout()"]');
+    
+    if (disconnectBtn) {
+        disconnectBtn.style.display = isMobile ? 'none' : 'block';
+    }
+
+    // Автоматическое выравнивание контента по центру для мобильных устройств
+    const panels = document.querySelectorAll('.panel, .glass.card');
+    panels.forEach(p => {
+        if (isMobile) {
+            p.style.textAlign = 'center';
+            p.style.display = 'flex';
+            p.style.flexDirection = 'column';
+            p.style.justifyContent = 'center';
+            p.style.alignItems = 'center';
+        } else {
+            p.style.textAlign = '';
+            p.style.display = '';
+            p.style.flexDirection = '';
+            p.style.alignItems = '';
+        }
+    });
 }
 
 function switchAuthTab(tab) {
@@ -157,6 +185,7 @@ function switchAuthTab(tab) {
         document.querySelectorAll('.tab-btn')[1].classList.add('active');
         document.getElementById('register-form').classList.add('active');
     }
+    applyMobileLayoutUpdates();
 }
 
 function showActivePanel(panelId) {
@@ -164,7 +193,10 @@ function showActivePanel(panelId) {
     allPanels.forEach(panel => panel.classList.remove('active'));
 
     const targetPanel = document.getElementById(panelId);
-    if (targetPanel) targetPanel.classList.add('active');
+    if (targetPanel) {
+        targetPanel.classList.add('active');
+    }
+    applyMobileLayoutUpdates();
 }
 
 // ==========================================
@@ -264,13 +296,13 @@ async function handleLogin(e) {
 }
 
 // ==========================================
-// USER OPERATIONS & LEDGER
+// USER OPERATIONS & LEDGER (LMT CURRENCY)
 // ==========================================
 function initUserDashboard() {
     showActivePanel('user-dashboard');
     document.getElementById('user-display-name').innerText = currentUser.username.toUpperCase();
     document.getElementById('user-bank-id').innerText = currentUser.bank_id;
-    // ЗДЕСЬ ИЗМЕНЕНО НА LMT
+    // НА СТО ПРОЦЕНТОВ ЗАМЕНЕНО НА ТЕКСТ LMT
     document.getElementById('user-balance').innerText = `${parseFloat(currentUser.balance).toFixed(2)} LMT`;
     loadTransactionHistory();
 }
@@ -298,9 +330,9 @@ async function loadTransactionHistory() {
             const isIncoming = tx.receiver_id === currentUser.bank_id;
             const item = document.createElement('div');
             item.className = `ledger-item ${isIncoming ? 'incoming' : 'outgoing'}`;
-            // ЗДЕСЬ В ИСТОРИИ ТАКЖЕ ИЗМЕНЕНО НА LMT
+            // В ИСТОРИИ ПЕРЕВОДОВ ВЫВОДИМ ТОЛЬКО LMT
             item.innerHTML = `
-                <div>
+                <div style="text-align: left;">
                     <p style="font-weight:700;">${isIncoming ? '← NET_INFLOW' : '→ NET_OUTFLOW'}</p>
                     <small style="color:#64748b;">${isIncoming ? 'From: ' + tx.sender_id : 'To: ' + tx.receiver_id}</small>
                 </div>
@@ -369,7 +401,7 @@ async function initAdminDashboard() {
         users.forEach(u => {
             if(u.is_admin) return;
             const tr = document.createElement('tr');
-            // ЗДЕСЬ В ТАБЛИЦЕ ВСЕХ ЮЗЕРОВ ДЛЯ АДМИНА ТАКЖЕ ПОМЕНЯЛ НА LMT
+            // В ТАБЛИЦЕ АДМИНА ДЛЯ ВСЕХ ПОЛЬЗОВАТЕЛЕЙ ВЫВОДИМ LMT
             tr.innerHTML = `
                 <td>${u.username}</td>
                 <td style="font-family:'Orbitron';">${u.bank_id}</td>
