@@ -3,120 +3,221 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZHOMER BANK // Core Network Terminal</title>
-    <meta property="og:title" content="ZHOMER BANK // Premium Cyberpunk UI">
-    <meta property="og:description" content="Global Decentralized Banking System Platform.">
+    <title>NRUSTIX BANK // Cyberpunk Core 3.0</title>
+    <meta property="og:title" content="NRUSTIX BANK // Cyberpunk Core 3.0">
+    <meta property="og:description" content="Premium Futuristic RP Banking System">
+    <meta property="og:type" content="website">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
 <body>
 
-    <div id="three-bg-container"></div>
-
-    <div id="preload-screen">
-        <div class="loader-content">
-            <h1 class="blink-text">LOADING ZHOMER_CORE_NET...</h1>
-            <div class="progress-bar"><div class="progress-fill"></div></div>
-            <p class="status-node">ESTABLISHING SECURE PROTOCOL // PORT 8080</p>
+    <div id="preloader" class="preloader">
+        <div class="preloader-content">
+            <h1 class="glitch-text" data-text="NRUSTIX BANK">NRUSTIX BANK</h1>
+            <div class="loader-bar-container">
+                <div class="loader-bar"></div>
+            </div>
+            <p class="loader-status">INITIALIZING QUANTUM NETHER SECURE LINK...</p>
         </div>
     </div>
 
-    <div class="terminal-mainframe">
+    <div id="canvas-container"></div>
+    <div class="scanlines"></div>
 
-        <div id="auth-screen" class="screen-panel">
-            <div class="auth-header">
-                <h1 class="neon-title-green">====== ZHOMER BANK ======</h1>
-                <p class="system-status">GLOBAL HOST: ONLINE // SECURE_QUANTUM_LINK</p>
+    <main id="app-container">
+        
+        <section id="auth-screen" class="auth-container hidden">
+            <div class="auth-card">
+                <div class="auth-header">
+                    <div class="cyber-logo"></div>
+                    <h2 class="bank-title">NRUSTIX BANK</h2>
+                    <p class="bank-subtitle">SECURE TERMINAL // VER 3.0</p>
+                </div>
+                
+                <div class="auth-tabs">
+                    <button id="tab-login" class="tab-btn active">ВХОД</button>
+                    <button id="tab-register" class="tab-btn">РЕГИСТРАЦИЯ</button>
+                </div>
+
+                <form id="login-form" class="auth-form">
+                    <div class="input-group">
+                        <input type="text" id="login-username" required placeholder=" ">
+                        <label>Username</label>
+                        <div class="input-glow"></div>
+                    </div>
+                    <div class="input-group">
+                        <input type="password" id="login-password" required placeholder=" ">
+                        <label>Password</label>
+                        <div class="input-glow"></div>
+                    </div>
+                    <button type="submit" class="cyber-btn btn-green">ACCESS SYSTEM</button>
+                </form>
+
+                <form id="register-form" class="auth-form hidden">
+                    <div class="input-group">
+                        <input type="text" id="reg-username" required placeholder=" ">
+                        <label>Username</label>
+                        <div class="input-glow"></div>
+                    </div>
+                    <div class="input-group">
+                        <input type="password" id="reg-password" required placeholder=" ">
+                        <label>Password</label>
+                        <div class="input-glow"></div>
+                    </div>
+                    <div class="input-group">
+                        <input type="password" id="reg-password-repeat" required placeholder=" ">
+                        <label>Repeat Password</label>
+                        <div class="input-glow"></div>
+                    </div>
+                    <button type="submit" class="cyber-btn btn-green">CREATE ACCOUNT</button>
+                </form>
             </div>
-            
-            <div class="auth-modes">
-                <div id="login-box" class="auth-sub-box">
-                    <h3>[ САНКЦИОНИРОВАННЫЙ ВХОД ]</h3>
-                    <div class="form-group">
-                        <label>ИДЕНТИФИКАТОР (USERNAME):</label>
-                        <input type="text" id="login-username" placeholder="ВВЕДИТЕ ЛОГИН..." autocomplete="off">
+        </section>
+
+        <section id="dashboard-screen" class="dashboard-container hidden">
+            <header class="dash-header">
+                <div class="header-logo">
+                    <span class="logo-dot"></span>
+                    <h1 class="dash-bank-title">NRUSTIX CORE</h1>
+                </div>
+                <div class="header-user-actions">
+                    <span id="display-user-type" class="badge badge-user">USER NODE</span>
+                    <button id="logout-btn" class="logout-btn">DISCONNECT</button>
+                </div>
+            </header>
+
+            <div class="grid-layout">
+                <div class="cyber-panel profile-card">
+                    <div class="card-reflection"></div>
+                    <div class="profile-header">
+                        <div class="avatar-glow">
+                            <div class="avatar-icon"></div>
+                        </div>
+                        <div class="profile-info">
+                            <h3 id="user-display-name">N/A</h3>
+                            <p class="id-label">BANK ID: <span id="user-display-id" class="neon-text-cyan">00000000</span></p>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label>КРИПТО-КЛЮЧ (PASSWORD):</label>
-                        <input type="password" id="login-password" placeholder="ВВЕДИТЕ ПАРОЛЬ...">
+                    <div class="balance-display">
+                        <span class="balance-title">AVAILABLE CREDITS</span>
+                        <h2 class="balance-amount"><span id="user-display-balance">0</span> <span class="currency">N$</span></h2>
                     </div>
-                    <button id="action-login-btn" class="neon-btn-green">ИНИЦИИРОВАТЬ ВХОД</button>
                 </div>
 
-                <div id="register-box" class="auth-sub-box">
-                    <h3>[ СОЗДАТЬ НОВЫЙ АККАУНТ ]</h3>
-                    <div class="form-group">
-                        <label>ЖЕЛАЕМЫЙ ЛОГИН (USERNAME):</label>
-                        <input type="text" id="reg-username" placeholder="МАКСИМУМ 15 СИМВОЛОВ..." autocomplete="off">
-                    </div>
-                    <div class="form-group">
-                        <label>КРИПТО-КЛЮЧ (PASSWORD):</label>
-                        <input type="password" id="reg-password" placeholder="МИНИМУМ 6 СИМВОЛОВ...">
-                    </div>
-                    <div class="form-group">
-                        <label>ПОВТОР КРИПТО-КЛЮЧА:</label>
-                        <input type="password" id="reg-repeat-password" placeholder="ПОВТОРИТЕ ПАРОЛЬ...">
-                    </div>
-                    <button id="action-register-btn" class="neon-btn-cyan">ЗАРЕГИСТРИРОВАТЬ В СЕТИ</button>
+                <div class="cyber-panel transfer-card">
+                    <h3>TRANSACTION TERMINAL</h3>
+                    <form id="transfer-form">
+                        <div class="input-group">
+                            <input type="text" id="transfer-target-id" required placeholder=" " maxlength="8">
+                            <label>Recipient Bank ID</label>
+                            <div class="input-glow"></div>
+                        </div>
+                        <div class="input-group">
+                            <input type="number" id="transfer-amount" min="1" required placeholder=" ">
+                            <label>Amount (N$)</label>
+                            <div class="input-glow"></div>
+                        </div>
+                        <button type="submit" class="cyber-btn btn-cyan">SEND CREDITS</button>
+                    </form>
                 </div>
+
+                <div class="cyber-panel history-card full-width">
+                    <h3>TRANSACTION LEDGER</h3>
+                    <div class="ledger-container">
+                        <table class="ledger-table">
+                            <thead>
+                                <tr>
+                                    <th>TIMESTAMP</th>
+                                    <th>TYPE</th>
+                                    <th>SENDER / RECIPIENT</th>
+                                    <th>AMOUNT</th>
+                                </tr>
+                            </thead>
+                            <tbody id="transaction-history-tbody">
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="admin-screen" class="dashboard-container admin-theme hidden">
+            <header class="dash-header">
+                <div class="header-logo">
+                    <span class="logo-dot admin-dot"></span>
+                    <h1 class="dash-bank-title gold-text">NRUSTIX OVERLORD</h1>
+                </div>
+                <div class="header-user-actions">
+                    <span class="badge badge-admin">MASTER ROOT</span>
+                    <button id="admin-logout-btn" class="logout-btn admin-logout">DISCONNECT</button>
+                </div>
+            </header>
+
+            <div class="admin-grid">
+                <div class="cyber-panel admin-panel-accounts full-width">
+                    <div class="panel-header-flex">
+                        <h3>GLOBAL ACCOUNTS DATABASE</h3>
+                        <span class="system-status-pulse">SYSTEM: OPERATIONAL</span>
+                    </div>
+                    <div class="ledger-container">
+                        <table class="ledger-table admin-table">
+                            <thead>
+                                <tr>
+                                    <th>BANK ID</th>
+                                    <th>USERNAME</th>
+                                    <th>BALANCE</th>
+                                    <th>STATUS</th>
+                                    <th>ACTIONS</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-accounts-tbody">
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="cyber-panel admin-quick-actions">
+                    <h3>ROOT MODIFICATION MODULE</h3>
+                    <form id="admin-action-form">
+                        <div class="input-group">
+                            <input type="text" id="admin-target-id" required placeholder=" ">
+                            <label>Target Bank ID</label>
+                            <div class="input-glow-gold"></div>
+                        </div>
+                        <div class="input-group">
+                            <input type="number" id="admin-amount" placeholder=" ">
+                            <label>Amount (For Give/Remove)</label>
+                            <div class="input-glow-gold"></div>
+                        </div>
+                        <div class="admin-buttons-grid">
+                            <button type="button" data-action="give" class="admin-btn btn-gold">GIVE MONEY</button>
+                            <button type="button" data-action="remove" class="admin-btn btn-gold-red">REMOVE</button>
+                            <button type="button" data-action="ban" class="admin-btn btn-red-dark">BAN</button>
+                            <button type="button" data-action="unban" class="admin-btn btn-cyan-dark">UNBAN</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <div id="notification-container" class="notification-container"></div>
+
+        <div id="ban-screen" class="ban-overlay hidden">
+            <div class="ban-modal">
+                <div class="glitch-icon">⚠️</div>
+                <h1 class="glitch-text" data-text="TERMINAL TERMINATED">ACCESS DENIED</h1>
+                <p class="ban-reason">Ваш аккаунт был заблокирован администрацией сети NRUSTIX.</p>
+                <div class="ban-footer">CODE: NEON_BAN_REASON_21</div>
+                <button id="ban-return-btn" class="cyber-btn btn-red">RETURN TO AUTH</button>
             </div>
         </div>
 
-        <div id="app-screen" class="screen-panel hidden">
-            <div class="panel-header">
-                <h2>ПАНЕЛЬ ОПЕРАТОРА: <span id="user-login-name" class="text-glow-green">...</span></h2>
-                <button id="logout-btn" class="neon-btn-red">РАЗОРВАТЬ СОЕДИНЕНИЕ</button>
-            </div>
-            <p class="tech-id-label">BANK_ID СИСТЕМЫ: <span id="user-tech-id" class="text-glow-cyan">...</span></p>
-            <hr class="neon-hr-green">
-            
-            <div class="dashboard-grid">
-                <div class="grid-box balance-card">
-                    <h3>ТЕКУЩИЕ ЛИКВИДНЫЕ АКТИВЫ</h3>
-                    <div class="balance-display"><span id="user-balance">0.00</span> <span class="currency-symbol">¤</span></div>
-                </div>
-
-                <div class="grid-box transfer-card">
-                    <h3>МЕЖБАНКОВСКИЙ КВАНТОВЫЙ ПЕРЕВОД</h3>
-                    <div class="form-group">
-                        <label>BANK ID ПОЛУЧАТЕЛЯ (8 ЦИФР):</label>
-                        <input type="text" id="target-bank-id" placeholder="ПРИМЕР: 58294173" maxlength="8">
-                    </div>
-                    <div class="form-group">
-                        <label>СУММА ОПЕРАЦИИ (¤):</label>
-                        <input type="number" id="transfer-amount" placeholder="0.00" min="1">
-                    </div>
-                    <button id="send-btn" class="neon-btn-green wide-btn">ЗАПУСТИТЬ ТРАНЗАКЦИЮ</button>
-                </div>
-            </div>
-
-            <hr class="neon-hr-green">
-
-            <div class="history-section">
-                <h3>АРХИВ ТРАНЗАКЦИОННЫХ КРИПТО-ЛОГОВ</h3>
-                <div class="history-container">
-                    <ul id="history-list">
-                        </ul>
-                </div>
-            </div>
-        </div>
-
-        <div id="admin-screen" class="screen-panel hidden">
-            <div class="panel-header admin-border">
-                <h2 class="text-glow-gold">ГОЛОВНОЙ ТЕРМИНАЛ АДМИНИСТРАТОРА (МАТРИЦА СЕТИ)</h2>
-                <button id="admin-logout-btn" class="neon-btn-red">ВЫХОД ИЗ СИСТЕМЫ</button>
-            </div>
-            <p class="tech-id-label">РЕЖИМ: БОГ (INFINITY_LIQUIDITY_GRANTED)</p>
-            <hr class="neon-hr-gold">
-            
-            <h3>ГЛОБАЛЬНЫЙ СУПЕР-СПИСОК ВСЕХ ЖИВЫХ АККАУНТОВ В ОБЛАКЕ</h3>
-            <div id="admin-users-list" class="admin-scroll-zone">
-                </div>
-        </div>
-
-    </div>
-
-    <script src="database.js"></script>
-    <script src="script.js"></script>
+    </main>
 </body>
 </html>
