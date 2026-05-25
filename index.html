@@ -3,19 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TRUSTIX SYSTEM</title>
+    <title>TRUSTIX CONTROL CENTER</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
     <canvas id="cyber-canvas"></canvas>
-    <div id="cursor-glow"></div>
 
     <div id="cyber-notification-zone"></div>
 
     <div class="theme-selector">
-        <span style="font-size: 0.75rem; font-family: 'Orbitron'; color: var(--text-muted);">SYSTEM THEME:</span>
-        <div class="theme-dot dot-green active" onclick="setTheme('green')"></div>
+        <div class="theme-dot dot-green" onclick="setTheme('green')"></div>
         <div class="theme-dot dot-cyan" onclick="setTheme('cyan')"></div>
         <div class="theme-dot dot-pink" onclick="setTheme('pink')"></div>
     </div>
@@ -33,49 +31,47 @@
 
         <div id="auth-panel" class="panel active">
             <div class="glass card">
-                <h2 class="neon-title-green">SECURE GATEWAY</h2>
+                <h2 class="logo-text" style="font-size: 2rem; margin-bottom: 30px; text-align: center;">TRUSTIX</h2>
                 
                 <div class="auth-tabs">
-                    <button id="tab-login-btn" class="tab-btn active" onclick="switchAuthTab('login')">LOGIN</button>
-                    <button id="tab-register-btn" class="tab-btn" onclick="switchAuthTab('register')">REGISTER</button>
+                    <button class="tab-btn active" onclick="switchAuthTab('login')">LOGIN</button>
+                    <button class="tab-btn" onclick="switchAuthTab('register')">REGISTER</button>
                 </div>
 
-                <div id="login-form-block" class="auth-form-section active">
+                <div id="login-form" class="auth-form-block active">
                     <div class="input-group">
-                        <label>USER ID / WALLET NODE</label>
-                        <input type="text" id="login-username" placeholder="ENTER YOUR ID...">
+                        <label>USER ID / WALLET</label>
+                        <input type="text" id="login-username" placeholder="ENTER ID...">
                     </div>
                     <div class="input-group">
-                        <label>ACCESS PASSWORD</label>
+                        <label>ACCESS KEY</label>
                         <input type="password" id="login-password" placeholder="••••••••">
                     </div>
-                    <button class="cyber-btn" onclick="handleAuth('login')">CONNECT TO SYSTEM</button>
+                    <button class="cyber-btn" onclick="handleAuth('login')">ACCESS SYSTEM</button>
                 </div>
 
-                <div id="register-form-block" class="auth-form-section">
+                <div id="register-form" class="auth-form-block">
                     <div class="input-group">
-                        <label>CREATE UNIQUE USER ID</label>
-                        <input type="text" id="register-username" placeholder="CREATE NEW ID...">
+                        <label>CREATE USER ID</label>
+                        <input type="text" id="register-username" placeholder="NEW ID...">
                     </div>
                     <div class="input-group">
-                        <label>GENERATE ACCESS KEY</label>
+                        <label>GENERATE PASSWORD</label>
                         <input type="password" id="register-password" placeholder="••••••••">
                     </div>
-                    <button class="cyber-btn" onclick="handleAuth('register')">REGISTER NEW NODE</button>
+                    <button class="cyber-btn" onclick="handleAuth('register')">CREATE ACCOUNT</button>
                 </div>
-
             </div>
         </div>
 
         <div id="dashboard-panel" class="panel">
             <div class="dashboard-grid">
-                
                 <div class="glass card">
-                    <div class="card-header">
-                        <div class="avatar-node"></div>
+                    <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 25px;">
+                        <div style="width: 45px; height: 45px; background: var(--neon-accent); border-radius: 50%; box-shadow: 0 0 15px var(--neon-glow);"></div>
                         <div>
                             <h3 style="font-family: 'Orbitron';">USER NODE</h3>
-                            <span class="status-badge">ONLINE</span>
+                            <span style="color: var(--neon-green); font-size: 0.8rem;">ONLINE</span>
                         </div>
                     </div>
 
@@ -85,15 +81,15 @@
                     </div>
 
                     <div class="input-group">
-                        <label>TARGET NODE (RECIPIENT)</label>
-                        <input type="text" id="tx-recipient" placeholder="NODE ADDRESS...">
+                        <label>TARGET NODE</label>
+                        <input type="text" id="tx-recipient" placeholder="ADDRESS...">
                     </div>
                     <div class="input-group">
-                        <label>TRANSFER AMOUNT</label>
+                        <label>AMOUNT</label>
                         <input type="number" id="tx-amount" placeholder="0.00">
                     </div>
 
-                    <div class="cyber-buttons-stack">
+                    <div class="buttons-fix-container">
                         <button class="cyber-btn" onclick="executeTransaction()">EXECUTE TRANSACTION</button>
                         <button class="cyber-btn red-glow" onclick="logout()">DISCONNECT NODE</button>
                     </div>
@@ -101,39 +97,36 @@
 
                 <div class="glass card">
                     <h3 class="meta-label" style="margin-bottom: 20px; font-family: 'Orbitron';">TRANSACTION LEDGER</h3>
-                    <div class="ledger-container" id="ledger-items">
-                        </div>
+                    <div class="ledger-container" id="ledger-items"></div>
                 </div>
-
             </div>
         </div>
 
         <div id="admin-panel" class="panel">
             <div class="glass card">
-                <div class="admin-top-bar">
-                    <h2 style="font-family: 'Orbitron'; letter-spacing: 2px;">TRUSTIX CORE CONTROL</h2>
-                    <button class="cyber-btn red-glow" style="width: auto !important; padding: 10px 20px; margin: 0;" onclick="logout()">LOGOUT</button>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+                    <h2 style="font-family: 'Orbitron';">CORE CONTROL</h2>
+                    <button class="cyber-btn red-glow" style="width: auto; padding: 8px 20px;" onclick="logout()">LOGOUT</button>
                 </div>
 
                 <div class="admin-grid">
                     <div>
                         <div class="input-group">
-                            <label>TARGET USER ID</label>
+                            <label>TARGET USER</label>
                             <input type="text" id="admin-target-user" placeholder="USER ID...">
                         </div>
                         <div class="input-group">
-                            <label>CREDIT COUNTER</label>
+                            <label>AMOUNT</label>
                             <input type="number" id="admin-amount" placeholder="0.00">
                         </div>
 
-                        <div class="cyber-buttons-stack">
+                        <div class="buttons-fix-container">
                             <button class="cyber-btn" onclick="adminAction('inject')">INJECT CREDITS</button>
                             <button class="cyber-btn red-glow" onclick="adminAction('drain')">DRAIN CREDITS</button>
                         </div>
-                        
-                        <div class="cyber-buttons-stack" style="margin-top: 25px;">
-                            <button class="cyber-btn yell-glow" onclick="adminAction('ban')">BAN NODE</button>
-                            <button class="cyber-btn" onclick="adminAction('unban')">UNBAN NODE</button>
+                        <div class="buttons-fix-container" style="margin-top: 20px;">
+                            <button class="cyber-btn" style="border-color: #eab308;" onclick="adminAction('ban')">BAN USER</button>
+                            <button class="cyber-btn" onclick="adminAction('unban')">UNBAN USER</button>
                         </div>
                     </div>
 
@@ -147,14 +140,7 @@
                                     <th>ACTIONS</th>
                                 </tr>
                             </thead>
-                            <tbody id="admin-users-table">
-                                <tr>
-                                    <td>NODE_01</td>
-                                    <td>500.00 CC</td>
-                                    <td><span class="status-badge">ACTIVE</span></td>
-                                    <td><button class="terminate-btn">DELETE</button></td>
-                                </tr>
-                            </tbody>
+                            <tbody id="admin-users-table"></tbody>
                         </table>
                     </div>
                 </div>
@@ -163,71 +149,93 @@
 
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script>
-        // Прелоадер загрузки страницы
+        // ТВОЙ ОРИГИНАЛЬНЫЙ СКРИПТ КРУТЯЩЕЙСЯ ПЛАНЕТЫ
+        const canvas = document.getElementById('cyber-canvas');
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+        // Создание планеты (твоя оригинальная сетка)
+        const geometry = new THREE.SphereGeometry(4, 30, 30);
+        const material = new THREE.MeshBasicMaterial({
+            color: 0x00ff66,
+            wireframe: true,
+            transparent: true,
+            opacity: 0.15
+        });
+        const planet = new THREE.Mesh(geometry, material);
+        scene.add(planet);
+
+        camera.position.z = 8;
+
+        // Анимация вращения планеты
+        function animate() {
+            requestAnimationFrame(animate);
+            planet.rotation.y += 0.002;
+            planet.rotation.x += 0.001;
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // Функция переключения вкладок LOGIN / REGISTER
+        function switchAuthTab(tab) {
+            const loginForm = document.getElementById('login-form');
+            const registerForm = document.getElementById('register-form');
+            const tabs = document.querySelectorAll('.tab-btn');
+
+            tabs.forEach(t => t.classList.remove('active'));
+
+            if (tab === 'login') {
+                tabs[0].classList.add('active');
+                loginForm.classList.add('active');
+                registerForm.classList.remove('active');
+            } else {
+                tabs[1].classList.add('active');
+                registerForm.classList.add('active');
+                loginForm.classList.remove('active');
+            }
+        }
+
+        // Прелоадер
         window.addEventListener('load', () => {
             setTimeout(() => {
                 const preloader = document.getElementById('preloader');
                 preloader.style.opacity = '0';
                 setTimeout(() => preloader.style.display = 'none', 500);
-            }, 800);
+            }, 1000);
         });
 
-        // ЖЕСТКАЯ ФУНКЦИЯ ПЕРЕКЛЮЧЕНИЯ ВКЛАДОК LOGIN / REGISTER
-        function switchAuthTab(tabName) {
-            const loginBlock = document.getElementById('login-form-block');
-            const registerBlock = document.getElementById('register-form-block');
-            const loginTabBtn = document.getElementById('tab-login-btn');
-            const registerTabBtn = document.getElementById('tab-register-btn');
-
-            // Сбрасываем активные классы со всего
-            loginTabBtn.classList.remove('active');
-            registerTabBtn.classList.remove('active');
-            loginBlock.classList.remove('active');
-            registerBlock.classList.remove('active');
-
-            // Включаем только то, на что нажали
-            if (tabName === 'login') {
-                loginTabBtn.classList.add('active');
-                loginBlock.classList.add('active');
-            } else if (tabName === 'register') {
-                registerTabBtn.classList.add('active');
-                registerBlock.classList.add('active');
-            }
-        }
-
-        // Переключение визуальных тем
         function setTheme(theme) {
             document.body.className = '';
-            document.querySelectorAll('.theme-dot').forEach(d => d.classList.remove('active'));
-            if (theme !== 'green') {
-                document.body.classList.add('theme-' + theme);
-            }
-            event.target.classList.add('active');
+            if (theme !== 'green') document.body.classList.add('theme-' + theme);
+            // Динамически меняем цвет планете под тему
+            if (theme === 'green') planet.material.color.setHex(0x00ff66);
+            if (theme === 'cyan') planet.material.color.setHex(0x00f0ff);
+            if (theme === 'pink') planet.material.color.setHex(0xff00ff);
         }
 
-        // Заглушки для авторизации и тестов
-        function handleAuth(type) { 
-            showNotification('Авторизация выполнена', 'success');
+        // Заглушки, чтобы не было ошибок
+        function handleAuth(type) {
             document.getElementById('auth-panel').classList.remove('active');
-            document.getElementById('dashboard-panel').classList.add('active'); 
+            document.getElementById('dashboard-panel').classList.add('active');
         }
         function logout() {
             document.getElementById('dashboard-panel').classList.remove('active');
             document.getElementById('admin-panel').classList.remove('active');
             document.getElementById('auth-panel').classList.add('active');
         }
-        // Вспомогательные функции уведомлений
-        function executeTransaction() { showNotification('Транзакция отправлена', 'success'); }
-        function adminAction(action) { showNotification('Выполнено действие: ' + action, 'success'); }
-        function showNotification(text, type) {
-            const zone = document.getElementById('cyber-notification-zone');
-            const alert = document.createElement('div');
-            alert.className = `cyber-alert cyber-alert-${type}`;
-            alert.innerHTML = `<div class="alert-title">SYSTEM LOG</div><div class="alert-desc">${text}</div>`;
-            zone.appendChild(alert);
-            setTimeout(() => alert.remove(), 3000);
-        }
+        function executeTransaction() {}
+        function adminAction(type) {}
     </script>
 </body>
 </html>
