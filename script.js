@@ -115,69 +115,102 @@ function showActivePanel(panelId) {
 }
 
 // ==========================================
-// CORE AUTHENTICATION LOGIC
+// СТРОГАЯ ЛОГИКА АВТОРИЗАЦИИ И РЕГИСТРАЦИИ
 // ==========================================
+
+// 1. РЕГИСТРАЦИЯ (Не создает аккаунт, если Username уже занят)
 async function handleRegister(e) {
     e.preventDefault();
     const user = document.getElementById('reg-username').value.trim();
     const pass = document.getElementById('reg-password').value;
     const repeat = document.getElementById('reg-repeat').value;
 
-    if (pass !== repeat) return alert("SECURITY ERROR: Passwords absolute mismatch.");
-    const generatedBankId = Math.floor(10000000 + Math.random() * 90000000).toString();
+    if (pass !== repeat) {
+        return alert("SECURITY ERROR: Passwords absolute mismatch.");
+    }
 
     try {
-        const { data, error } = await _supabase
+        // Проверяем, существует ли уже такой Username в базе данных
+        const { data: existingUser, error: checkError } = await _supabase
             .from('users')
-            .insert([{ username: user, password_hash: pass, bank_id: generatedBankId }])
-            .select();
+            .select('username')
+            .eq('username', user)
+            .maybeSingle();
 
-        if (error) throw error;
-        alert(`ACCESS GRANTED. Your Core Bank ID is: ${generatedBankId}`);
+        if (checkError) throw checkError;
+
+        if (existingUser) {
+            return alert("REGISTRATION FAILED: Username already operational within Net Matrix.");
+        }
+
+        // Если всё чисто — генерируем ID и создаем аккаунт со стартовым балансом 0
+        const generatedBankId = Math.floor(10000000 + Math.random() * 90000000).toString();
+
+        const { error: insertError } = await _supabase
+            .from('users')
+            .insert([{ username: user, password_hash: pass, bank_id: generatedBankId, balance: 0.00 }]);
+
+        if (insertError) throw insertError;
+
+        alert(`ACCESS GRANTED. Account registered! Your Core Bank ID is: ${generatedBankId}`);
         switchAuthTab('login');
+
     } catch (err) {
-        console.warn("Supabase simulator active.");
-        alert(`[SIMULATOR MODE] Account created! ID: ${generatedBankId}`);
-        switchAuthTab('login');
+        console.error(err);
+        alert("CRITICAL DATABASE ERROR: Could not process registration.");
     }
 }
 
+// 2. ВХОД (Ищет совпадения, никогда не создает новые профили)
 async function handleLogin(e) {
     e.preventDefault();
     const user = document.getElementById('login-username').value.trim();
     const pass = document.getElementById('login-password').value;
 
-    if (user === 'admin21' && pass === 'admin210412') {
-        currentUser = { username: 'admin21', bank_id: '99999999', balance: 999999999, is_admin: true, is_banned: false };
-        initAdminDashboard();
-        return;
+    // Хардкорный бэкдор для админа (сверяет строго заданный пароль)
+    if (user === 'admin21') {
+        if (pass === 'admin210412') {
+            currentUser = { username: 'admin21', bank_id: '99999999', balance: 999999999, is_admin: true, is_banned: false };
+            initAdminDashboard();
+            return;
+        } else {
+            return alert("ACCESS DENIED: Invalid encryption credentials.");
+        }
     }
 
     try {
+        // Запрашиваем пользователя, у которого совпадают и Логин, и Пароль
         const { data, error } = await _supabase
             .from('users')
             .select('*')
             .eq('username', user)
             .eq('password_hash', pass)
-            .single();
+            .maybeSingle();
 
-        if (error || !data) throw new Error("Invalid credentials");
+        if (error) throw error;
 
+        // Если база пустая или связка логин/пароль не найдена — ЖЕСТКИЙ ОТКАЗ
+        if (!data) {
+            return alert("ACCESS DENIED: Invalid username or encryption password.");
+        }
+
+        // Проверка на бан
         if (data.is_banned) {
             return showActivePanel('ban-panel');
         }
 
         currentUser = data;
-        if (data.is_admin) {
+
+        // Распределение по панелям
+        if (data.is_admin === true) {
             initAdminDashboard();
         } else {
             initUserDashboard();
         }
+
     } catch (err) {
-        console.warn("Supabase simulation active.");
-        // ТЕПЕРЬ ТУТ ИЗНАЧАЛЬНО СТОИТ БАЛАНС 0.00 ДЛЯ ТЕСТОВЫХ ЮЗЕРОВ
-        currentUser = { username: user, bank_id: '58294173', balance: 0.00, is_admin: false, is_banned: false };
-        initUserDashboard();
+        console.error(err);
+        alert("CONNECTION ERROR: Secure database link is offline.");
     }
 }
 
@@ -205,31 +238,31 @@ async function loadTransactionHistory() {
             .or(`sender_id.eq.${currentUser.bank_id},receiver_id.eq.${currentUser.bank_id}`)
             .order('timestamp', { ascending: false });
 
-        if (error || !data) throw error;
+        if (error) throw error;
+
+        if (!data || data.length === 0) {
+            container.innerHTML = '<p style="color:#64748b; text-align:center; margin-top:20px;">NO TRANSACTIONS DETECTED</p>';
+            return;
+        }
 
         data.forEach(tx => {
             const isIncoming = tx.receiver_id === currentUser.bank_id;
-            renderTxItem(container, isIncoming, tx.sender_id, tx.receiver_id, tx.amount);
+            const item = document.createElement('div');
+            item.className = `ledger-item ${isIncoming ? 'incoming' : 'outgoing'}`;
+            item.innerHTML = `
+                <div>
+                    <p style="font-weight:700;">${isIncoming ? '← NET_INFLOW' : '→ NET_OUTFLOW'}</p>
+                    <small style="color:#64748b;">${isIncoming ? 'From: ' + tx.sender_id : 'To: ' + tx.receiver_id}</small>
+                </div>
+                <span style="font-family:'Orbitron'; font-weight:700; color: ${isIncoming ? 'var(--neon-green)' : 'var(--neon-red)'}">
+                    ${isIncoming ? '+' : '-'}${parseFloat(tx.amount).toFixed(2)} ฿
+                </span>
+            `;
+            container.appendChild(item);
         });
     } catch (e) {
-        // Если баланс 0 и транзакций нет, просто оставляем панель чистой
-        container.innerHTML = '<p style="color:#64748b; text-align:center; margin-top:20px;">NO TRANSACTIONS DETECTED</p>';
+        container.innerHTML = '<p style="color:#64748b; text-align:center; margin-top:20px;">ERROR LOADING LEDGER</p>';
     }
-}
-
-function renderTxItem(container, isIncoming, sender, receiver, amount) {
-    const item = document.createElement('div');
-    item.className = `ledger-item ${isIncoming ? 'incoming' : 'outgoing'}`;
-    item.innerHTML = `
-        <div>
-            <p style="font-weight:700;">${isIncoming ? '← NET_INFLOW' : '→ NET_OUTFLOW'}</p>
-            <small style="color:#64748b;">${isIncoming ? 'From: ' + sender : 'To: ' + receiver}</small>
-        </div>
-        <span style="font-family:'Orbitron'; font-weight:700; color: ${isIncoming ? 'var(--neon-green)' : 'var(--neon-red)'}">
-            ${isIncoming ? '+' : '-'}${parseFloat(amount).toFixed(2)} ฿
-        </span>
-    `;
-    container.appendChild(item);
 }
 
 async function handleTransfer(e) {
@@ -237,30 +270,39 @@ async function handleTransfer(e) {
     const destId = document.getElementById('transfer-id').value.trim();
     const amount = parseFloat(document.getElementById('transfer-amount').value);
 
-    if (destId === currentUser.bank_id) return alert("ERROR: Cannot loop transactions back into self node.");
-    if (amount > currentUser.balance) return alert("QUANTUM REFUSAL: Insufficient balance credits.");
+    if (destId === currentUser.bank_id) {
+        return alert("ERROR: Cannot loop transactions back into self node.");
+    }
+    if (amount > currentUser.balance) {
+        return alert("QUANTUM REFUSAL: Insufficient balance credits.");
+    }
 
     try {
         const { data: receiver, error: rErr } = await _supabase
             .from('users')
             .select('*')
             .eq('bank_id', destId)
-            .single();
+            .maybeSingle();
 
-        if (rErr || !receiver) throw new Error("Receiver node offline.");
+        if (rErr || !receiver) {
+            return alert("NODE NOT FOUND: Targeted Bank ID does not exist in Network.");
+        }
 
         const newSenderBal = parseFloat(currentUser.balance) - amount;
         const newRecBal = parseFloat(receiver.balance) + amount;
 
         await _supabase.from('users').update({ balance: newSenderBal }).eq('id', currentUser.id);
         await _supabase.from('users').update({ balance: newRecBal }).eq('id', receiver.id);
-        await _supabase.from('transactions').insert([{ sender_id: currentUser.bank_id, receiver_id: destId, amount: amount }]);
+        
+        await _supabase.from('transactions').insert([
+            { sender_id: currentUser.bank_id, receiver_id: destId, amount: amount }
+        ]);
 
         currentUser.balance = newSenderBal;
         alert("CREDIT TRANSFER EXECUTED SUCCESSFULLY.");
         initUserDashboard();
     } catch (err) {
-        alert("TRANSACTION ERROR: Insufficient or unstable neural connection.");
+        alert("TRANSACTION ERROR: Server rejected the transfer block.");
     }
 }
 
@@ -275,26 +317,22 @@ async function initAdminDashboard() {
 
     try {
         const { data: users, error } = await _supabase.from('users').select('*');
-        if (error || !users) throw error;
+        if (error || !users) return;
         
         users.forEach(u => {
             if(u.is_admin) return;
-            renderAdminUserRow(tbody, u);
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${u.username}</td>
+                <td style="font-family:'Orbitron';">${u.bank_id}</td>
+                <td style="color:var(--neon-green); font-weight:bold;">${parseFloat(u.balance).toFixed(2)} ฿</td>
+                <td style="color: ${u.is_banned ? 'var(--neon-red)' : 'var(--neon-green)'}">${u.is_banned ? 'BANNED' : 'OPERATIONAL'}</td>
+            `;
+            tbody.appendChild(tr);
         });
     } catch (e) {
-        renderAdminUserRow(tbody, { username: 'Demo_User', bank_id: '58294173', balance: 0.00, is_banned: false });
+        console.error("Failed to load admin user matrix.");
     }
-}
-
-function renderAdminUserRow(tbody, u) {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-        <td>${u.username}</td>
-        <td style="font-family:'Orbitron';">${u.bank_id}</td>
-        <td style="color:var(--neon-green); font-weight:bold;">${parseFloat(u.balance).toFixed(2)} ฿</td>
-        <td style="color: ${u.is_banned ? 'var(--neon-red)' : 'var(--neon-green)'}">${u.is_banned ? 'BANNED' : 'OPERATIONAL'}</td>
-    `;
-    tbody.appendChild(tr);
 }
 
 async function executeAdminAction(action) {
@@ -304,8 +342,10 @@ async function executeAdminAction(action) {
     if(!targetId) return alert("ADMIN SPECIFICATION ERROR: Target ID required.");
 
     try {
-        const { data: targetUser, error } = await _supabase.from('users').select('*').eq('bank_id', targetId).single();
-        if(error || !targetUser) throw new Error();
+        const { data: targetUser, error } = await _supabase.from('users').select('*').eq('bank_id', targetId).maybeSingle();
+        if(error || !targetUser) {
+            return alert("TARGET NODE INVALID: User not found.");
+        }
 
         if (action === 'give' && amount > 0) {
             await _supabase.from('users').update({ balance: parseFloat(targetUser.balance) + amount }).eq('bank_id', targetId);
@@ -317,12 +357,12 @@ async function executeAdminAction(action) {
         } else if (action === 'unban') {
             await _supabase.from('users').update({ is_banned: false }).eq('bank_id', targetId);
         }
-    } catch (err) {
-        console.log("Admin action simulator executed.");
-    }
 
-    alert(`ADMIN ACTION [${action.toUpperCase()}] ENGAGED ON NODE ${targetId}`);
-    initAdminDashboard();
+        alert(`ADMIN ACTION [${action.toUpperCase()}] ENGAGED ON NODE ${targetId}`);
+        initAdminDashboard();
+    } catch (err) {
+        alert("ADMIN ACTION REFUSED BY DATABASE.");
+    }
 }
 
 function logout() {
