@@ -4,7 +4,7 @@ let earth = null;
 let dirLight = null;    
 
 // ==========================================
-// THREE.JS 3D ENGINE (TRUSTIX PLANET)
+// THREE.JS 3D ENGINE
 // ==========================================
 function init3DEngine() {
     const canvas = document.getElementById('cyber-canvas');
@@ -57,9 +57,13 @@ function init3DEngine() {
 
     function animate() {
         requestAnimationFrame(animate);
-        earth.rotation.y += 0.0015;
-        earth.rotation.x += 0.0003;
-        particleSystem.rotation.y -= 0.0005;
+        if (earth) {
+            earth.rotation.y += 0.0015;
+            earth.rotation.x += 0.0003;
+        }
+        if (particleSystem) {
+            particleSystem.rotation.y -= 0.0005;
+        }
         renderer.render(scene, camera);
     }
     animate();
@@ -68,12 +72,11 @@ function init3DEngine() {
         camera.aspect = window.innerWidth / window.innerHeight;
         camera.updateProjectionMatrix();
         renderer.setSize(window.innerWidth, window.innerHeight);
-        applyMobileLayoutUpdates(); // Коррекция при смене экрана
     });
 }
 
 // ==========================================
-// CYBER NOTIFICATION FRAMEWORK
+// NOTIFICATIONS MATRIX
 // ==========================================
 function showCyberAlert(type, title, message) {
     const zone = document.getElementById('cyber-notification-zone');
@@ -98,7 +101,7 @@ function showCyberAlert(type, title, message) {
 }
 
 // ==========================================
-// REALTIME THEME CHANGER
+// MATRIX THEMES
 // ==========================================
 function changeMatrixTheme(themeName, element) {
     document.body.className = '';
@@ -127,51 +130,26 @@ function changeMatrixTheme(themeName, element) {
 }
 
 // ==========================================
-// UI & MOBILE CENTRALIZATION LOGIC
+// HARDCORE PANEL SWITCHER (FIX FOR OVERLAPS)
 // ==========================================
-function setupUIEffects() {
-    setTimeout(() => {
-        const loader = document.getElementById('preloader');
-        if (loader) {
-            loader.style.opacity = '0';
-            setTimeout(() => loader.style.display = 'none', 800);
-        }
-    }, 2000);
-
-    const cursor = document.getElementById('cursor-glow');
-    if (cursor) {
-        window.addEventListener('mousemove', (e) => {
-            cursor.style.left = e.clientX + 'px';
-            cursor.style.top = e.clientY + 'px';
-        });
-    }
-    applyMobileLayoutUpdates();
-}
-
-function applyMobileLayoutUpdates() {
-    const isMobile = window.innerWidth <= 480;
-    const disconnectBtn = document.querySelector('.cyber-btn.red-glow[onclick="logout()"]');
+function showActivePanel(panelId) {
+    const panels = ['auth-panel', 'user-dashboard', 'admin-dashboard', 'ban-panel'];
     
-    if (disconnectBtn) {
-        disconnectBtn.style.display = isMobile ? 'none' : 'block';
-    }
-
-    // Автоматическое выравнивание контента по центру для мобильных устройств
-    const panels = document.querySelectorAll('.panel, .glass.card');
-    panels.forEach(p => {
-        if (isMobile) {
-            p.style.textAlign = 'center';
-            p.style.display = 'flex';
-            p.style.flexDirection = 'column';
-            p.style.justifyContent = 'center';
-            p.style.alignItems = 'center';
-        } else {
-            p.style.textAlign = '';
-            p.style.display = '';
-            p.style.flexDirection = '';
-            p.style.alignItems = '';
+    panels.forEach(id => {
+        const p = document.getElementById(id);
+        if (p) {
+            p.style.display = 'none';
+            p.classList.remove('active');
         }
     });
+
+    const target = document.getElementById(panelId);
+    if (target) {
+        target.style.display = 'block';
+        setTimeout(() => {
+            target.classList.add('active');
+        }, 10);
+    }
 }
 
 function switchAuthTab(tab) {
@@ -185,25 +163,14 @@ function switchAuthTab(tab) {
         document.querySelectorAll('.tab-btn')[1].classList.add('active');
         document.getElementById('register-form').classList.add('active');
     }
-    applyMobileLayoutUpdates();
-}
-
-function showActivePanel(panelId) {
-    const allPanels = document.querySelectorAll('.panel');
-    allPanels.forEach(panel => panel.classList.remove('active'));
-
-    const targetPanel = document.getElementById(panelId);
-    if (targetPanel) {
-        targetPanel.classList.add('active');
-    }
-    applyMobileLayoutUpdates();
 }
 
 // ==========================================
-// REAL-TIME AUTHENTICATION (SUPABASE)
+// SUPABASE SECURE AUTHORIZATION
 // ==========================================
-async function handleRegister(e) {
-    e.preventDefault();
+async function handleRegister(event) {
+    event.preventDefault();
+    
     const user = document.getElementById('reg-username').value.trim();
     const pass = document.getElementById('reg-password').value;
     const repeat = document.getElementById('reg-repeat').value;
@@ -214,7 +181,7 @@ async function handleRegister(e) {
 
     try {
         if (typeof _supabase === 'undefined') {
-            return showCyberAlert('error', 'CONFIG ERROR', 'Database connection (supabase.js) is missing.');
+            return showCyberAlert('error', 'CONFIG ERROR', 'Database connection missing.');
         }
 
         const { data: existingUser, error: checkError } = await _supabase
@@ -241,28 +208,30 @@ async function handleRegister(e) {
         switchAuthTab('login');
 
     } catch (err) {
-        showCyberAlert('error', 'DATABASE CRASH', err.message || 'Could not sync with server.');
+        showCyberAlert('error', 'DATABASE CRASH', err.message);
     }
 }
 
-async function handleLogin(e) {
-    e.preventDefault();
+async function handleLogin(event) {
+    event.preventDefault();
+    
     const user = document.getElementById('login-username').value.trim();
     const pass = document.getElementById('login-password').value;
 
+    // Сверхзащищенный хардкод админа
     if (user === 'admin21') {
         if (pass === 'admin210412') {
             currentUser = { username: 'admin21', bank_id: '99999999', balance: 999999999, is_admin: true, is_banned: false };
             initAdminDashboard();
             return;
         } else {
-            return showCyberAlert('error', 'CORRUPTION DETECTED', 'Invalid encryption key for ADMIN node.');
+            return showCyberAlert('error', 'CORRUPTION DETECTED', 'Invalid encryption key.');
         }
     }
 
     try {
         if (typeof _supabase === 'undefined') {
-            return showCyberAlert('error', 'CONFIG ERROR', 'Database connection (supabase.js) is missing.');
+            return showCyberAlert('error', 'CONFIG ERROR', 'Database link offline.');
         }
 
         const { data, error } = await _supabase
@@ -275,7 +244,7 @@ async function handleLogin(e) {
         if (error) throw error;
 
         if (!data) {
-            return showCyberAlert('error', 'ACCESS DENIED', 'Invalid username or encryption password.');
+            return showCyberAlert('error', 'ACCESS DENIED', 'Invalid node parameters.');
         }
 
         if (data.is_banned) {
@@ -291,18 +260,17 @@ async function handleLogin(e) {
         }
 
     } catch (err) {
-        showCyberAlert('error', 'LINK OFFLINE', err.message || 'Secure link is unestablished.');
+        showCyberAlert('error', 'LINK OFFLINE', err.message);
     }
 }
 
 // ==========================================
-// USER OPERATIONS & LEDGER (LMT CURRENCY)
+// USER DASHBOARD MATRIX
 // ==========================================
 function initUserDashboard() {
     showActivePanel('user-dashboard');
     document.getElementById('user-display-name').innerText = currentUser.username.toUpperCase();
     document.getElementById('user-bank-id').innerText = currentUser.bank_id;
-    // НА СТО ПРОЦЕНТОВ ЗАМЕНЕНО НА ТЕКСТ LMT
     document.getElementById('user-balance').innerText = `${parseFloat(currentUser.balance).toFixed(2)} LMT`;
     loadTransactionHistory();
 }
@@ -330,7 +298,6 @@ async function loadTransactionHistory() {
             const isIncoming = tx.receiver_id === currentUser.bank_id;
             const item = document.createElement('div');
             item.className = `ledger-item ${isIncoming ? 'incoming' : 'outgoing'}`;
-            // В ИСТОРИИ ПЕРЕВОДОВ ВЫВОДИМ ТОЛЬКО LMT
             item.innerHTML = `
                 <div style="text-align: left;">
                     <p style="font-weight:700;">${isIncoming ? '← NET_INFLOW' : '→ NET_OUTFLOW'}</p>
@@ -347,13 +314,14 @@ async function loadTransactionHistory() {
     }
 }
 
-async function handleTransfer(e) {
-    e.preventDefault();
+async function handleTransfer(event) {
+    event.preventDefault();
+    
     const destId = document.getElementById('transfer-id').value.trim();
     const amount = parseFloat(document.getElementById('transfer-amount').value);
 
     if (destId === currentUser.bank_id) {
-        return showCyberAlert('error', 'LOOP ERROR', 'Cannot loop transactions back into self node.');
+        return showCyberAlert('error', 'LOOP ERROR', 'Cannot loop transactions.');
     }
     if (amount > currentUser.balance) {
         return showCyberAlert('error', 'QUANTUM REFUSAL', 'Insufficient balance credits.');
@@ -367,7 +335,7 @@ async function handleTransfer(e) {
             .maybeSingle();
 
         if (rErr || !receiver) {
-            return showCyberAlert('error', 'NODE ERROR', 'Targeted Bank ID does not exist.');
+            return showCyberAlert('error', 'NODE ERROR', 'Target ID does not exist.');
         }
 
         const newSenderBal = parseFloat(currentUser.balance) - amount;
@@ -381,12 +349,12 @@ async function handleTransfer(e) {
         showCyberAlert('success', 'SUCCESS', 'Credit transfer executed.');
         initUserDashboard();
     } catch (err) {
-        showCyberAlert('error', 'FATAL EXCEPTION', 'Server rejected transaction.');
+        showCyberAlert('error', 'FATAL EXCEPTION', 'Transaction rejected.');
     }
 }
 
 // ==========================================
-// ADMIN CONTROL MATRIX & DELETE FUNCTION
+// MASTER CONTROL DASHBOARD (ADMIN)
 // ==========================================
 async function initAdminDashboard() {
     showActivePanel('admin-dashboard');
@@ -401,7 +369,6 @@ async function initAdminDashboard() {
         users.forEach(u => {
             if(u.is_admin) return;
             const tr = document.createElement('tr');
-            // В ТАБЛИЦЕ АДМИНА ДЛЯ ВСЕХ ПОЛЬЗОВАТЕЛЕЙ ВЫВОДИМ LMT
             tr.innerHTML = `
                 <td>${u.username}</td>
                 <td style="font-family:'Orbitron';">${u.bank_id}</td>
@@ -412,28 +379,20 @@ async function initAdminDashboard() {
             tbody.appendChild(tr);
         });
     } catch (e) {
-        console.error("Failed to load admin user matrix.");
+        console.error("Failed to load user matrix.");
     }
 }
 
 async function terminateUserNode(bankId) {
-    if (!confirm(`// WARNING: Are you sure you want to completely erase Node [${bankId}]?`)) {
-        return;
-    }
+    if (!confirm(`// WARNING: Completely erase Node [${bankId}]?`)) return;
 
     try {
-        const { error } = await _supabase
-            .from('users')
-            .delete()
-            .eq('bank_id', bankId);
-
+        const { error } = await _supabase.from('users').delete().eq('bank_id', bankId);
         if (error) throw error;
-
-        showCyberAlert('success', 'NODE PURGED', `Account node [${bankId}] deleted.`);
+        showCyberAlert('success', 'NODE PURGED', 'Account node deleted.');
         initAdminDashboard(); 
-
     } catch (err) {
-        showCyberAlert('error', 'PURGE REFUSED', 'Database rejected node deletion.');
+        showCyberAlert('error', 'PURGE REFUSED', 'Deletion failed.');
     }
 }
 
@@ -445,25 +404,23 @@ async function executeAdminAction(action) {
 
     try {
         const { data: targetUser, error } = await _supabase.from('users').select('*').eq('bank_id', targetId).maybeSingle();
-        if(error || !targetUser) {
-            return showCyberAlert('error', 'TARGET NODE', 'User not found.');
-        }
+        if(error || !targetUser) return showCyberAlert('error', 'TARGET NODE', 'User not found.');
 
         if (action === 'give' && amount > 0) {
             await _supabase.from('users').update({ balance: parseFloat(targetUser.balance) + amount }).eq('bank_id', targetId);
         } else if (action === 'remove' && amount > 0) {
             let bal = Math.max(0, parseFloat(targetUser.balance) - amount);
             await _supabase.from('users').update({ balance: bal }).eq('id', targetUser.id);
-        } else if (action === 'ban') {
+        } else if (action === 'banned' || action === 'ban') {
             await _supabase.from('users').update({ is_banned: true }).eq('bank_id', targetId);
         } else if (action === 'unban') {
             await _supabase.from('users').update({ is_banned: false }).eq('bank_id', targetId);
         }
 
-        showCyberAlert('success', 'ACTION EXECUTED', `Admin action [${action.toUpperCase()}] engaged.`);
+        showCyberAlert('success', 'ACTION EXECUTED', 'Admin action engaged.');
         initAdminDashboard();
     } catch (err) {
-        showCyberAlert('error', 'CRITICAL REFUSAL', 'Admin action refused.');
+        showCyberAlert('error', 'CRITICAL REFUSAL', 'Action refused.');
     }
 }
 
@@ -472,8 +429,28 @@ function logout() {
     showActivePanel('auth-panel');
 }
 
-window.onload = () => {
+// ==========================================
+// CORE INITIALIZATION
+// ==========================================
+window.addEventListener('DOMContentLoaded', () => {
     init3DEngine();
-    setupUIEffects();
+    
+    // Плавное скрытие стартового прелоадера
+    setTimeout(() => {
+        const loader = document.getElementById('preloader');
+        if (loader) {
+            loader.style.opacity = '0';
+            setTimeout(() => loader.style.display = 'none', 600);
+        }
+    }, 1200);
+
+    const cursor = document.getElementById('cursor-glow');
+    if (cursor) {
+        window.addEventListener('mousemove', (e) => {
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
+        });
+    }
+
     showActivePanel('auth-panel');
-};
+});
