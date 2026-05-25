@@ -173,9 +173,10 @@ body {
     z-index: -1;
 }
 
+/* ГЛАВНЫЙ КОНТЕЙНЕР (РАСШИРИЛИ ДО 1450px ДЛЯ СВОБОДЫ ЭЛЕМЕНТОВ) */
 #app-container {
     width: 100%;
-    max-width: 1250px;
+    max-width: 1450px;
     margin: 0 auto;
     padding: 40px 20px;
     min-height: 100vh;
@@ -441,7 +442,7 @@ body {
 .no-tx { color: #5c6f84; text-align: center; font-family: 'Orbitron'; margin-top: 40px; font-size: 0.9rem; }
 
 /* ==========================================
-   ИСПРАВЛЕННАЯ АДМИН-ПАНЕЛЬ (БЕЗ ВЫЛЕЗАНИЯ ЗА КРАЯ)
+   ИСПРАВЛЕННАЯ АДМИН-ПАНЕЛЬ (БЕЗ ПОЛОСЫ ПРОКРУТКИ)
    ========================================== */
 .admin-layout { 
     display: none !important; 
@@ -470,10 +471,10 @@ body {
     font-size: 0.85rem; 
 }
 
-/* Сетка со строгим распределением против вылетания таблиц наружу */
+/* Пропорции 1fr к 1.5fr на широком экране дают таблице больше пространства */
 .admin-grid { 
     display: grid; 
-    grid-template-columns: 1fr 1.4fr; 
+    grid-template-columns: 1fr 1.5fr; 
     gap: 30px; 
     width: 100%;
     align-items: start;
@@ -485,14 +486,13 @@ body {
     gap: 12px; 
 }
 
-/* Ограничитель для монитора, защищающий от раздувания контента */
 .admin-monitor {
     width: 100%;
-    min-width: 0; /* Фикс распирания в Grid */
+    min-width: 0; 
     overflow: hidden;
 }
 
-/* Обёртка таблицы с внутренним скроллом, если данные не помещаются */
+/* Обертка таблицы: убрали принудительное переваливание, полоска появляется только если экран экстремально мал */
 .table-wrapper { 
     height: 350px; 
     overflow-y: auto; 
@@ -508,10 +508,10 @@ table {
 }
 
 th, td { 
-    padding: 14px 10px; 
+    padding: 14px 16px; /* Чуть увеличили отступы для красоты */
     text-align: left; 
     border-bottom: 1px solid rgba(255, 255, 255, 0.03); 
-    white-space: nowrap; /* Сохраняет строчность ячеек */
+    white-space: nowrap; 
 }
 
 th { 
@@ -527,7 +527,7 @@ th {
     border: none !important;
     font-family: 'Orbitron', sans-serif;
     font-weight: 900;
-    padding: 5px 10px;
+    padding: 5px 12px;
     font-size: 0.75rem;
     cursor: pointer;
     border-radius: 2px;
@@ -545,12 +545,12 @@ th {
 .ban-desc { color: #5c6f84; }
 
 /* ==========================================
-   АДАПТИВНОСТЬ ПОД МАЛЕНЬКИЕ ЭКРАНЫ И НОУТБУКИ
+   АДАПТИВНОСТЬ ПОД РАЗНЫЕ ЭКРАНЫ
    ========================================== */
-@media (max-width: 1100px) {
+@media (max-width: 1200px) {
     .admin-grid {
-        grid-template-columns: 1fr; /* На мелких экранах админка переходит в удобный стек */
-        gap: 20px;
+        grid-template-columns: 1fr; /* Аккуратно перестраиваем в одну колонку на небольших ноутбуках */
+        gap: 25px;
     }
 }
 
