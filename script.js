@@ -1,267 +1,360 @@
-document.addEventListener('DOMContentLoaded', () => {
-    // ИНИЦИАЛИЗАЦИЯ ТРЕХМЕРНОГО НЕОНОВОГО ФОНА (THREE.JS)
-    initThreeBackground();
+/**
+ * ZHOTOMER RP // DATABASE SYSTEM - CORE APPLICATION INTERACTIVITY
+ */
 
-    // ИМИТАЦИЯ ЗАГРУЗКИ КИБЕР-ТЕРМИНАЛА
-    setTimeout(() => {
-        const preload = document.getElementById('preload-screen');
-        if(preload) {
-            preload.style.opacity = '0';
-            setTimeout(() => preload.classList.add('hidden'), 500);
-        }
-    }, 1500);
+// Фейковые (или стартовые) правила для отображения точь-в-точь как на твоем скриншоте!
+const ROLES_AND_LAWS = [
+    {
+        title: "Пункт 1. Уважение и антибуллинг",
+        icon: "🚫",
+        articles: [
+            { code: "Статья 1.0", name: "Неуважение к игрокам или офицерам", desc: "Проявление неуважительного отношения в адрес участников игрового процесса или сотрудников правоохранительных органов.", fine: "Штраф: 6 000" },
+            { code: "Статья 1.1", name: "Запрещено оскорблять игроков во время RP-процесса", desc: "Использование оскорбительных выражений и унижение достоинства игроков в рамках активных ролевых ситуаций.", fine: "Штраф: 6 000" }
+        ]
+    },
+    {
+        title: "Пункт 2. Правила дорожного движения",
+        icon: "🚘",
+        articles: [
+            { code: "Статья 1.7", name: "Неправильная парковка (без аварийной сигнализации)", desc: "Остановка или бросание транспортного средства без включенной аварийной сигнализации на тротуарах, газонах, в туннелях, садах, парках, на кольцевых развязках, посреди дороги, на рельсах.", fine: "Штраф: 4 000" },
+            { code: "Статья 1.8", name: "Езда без включённых фар с 17:00 до 08:00", desc: "Движение на транспортном средстве в темное время суток без использования ближнего или дальнего освещения.", fine: "Штраф: 4 000" }
+        ]
+    },
+    {
+        title: "Пункт 3. Оружие и лицензии",
+        icon: "⚔️",
+        articles: [
+            { code: "Статья 3.1", name: "Открытое ношение оружия", desc: "Демонстрация огнестрельного или холодного оружия в людных и общественных местах.", fine: "Штраф: 6 000" },
+            { code: "Статья 3.2", name: "Стрельба без RP-причины", desc: "Применение огнестрельного оружия без веских внутриигровых (ролевых) оснований.", fine: "Тюремное заключение и изъятие лицензий", isJail: true }
+        ]
+    }
+];
 
-    // ССЫЛКИ НА ЭКРАНЫ И ИНПУТЫ
-    const authScreen = document.getElementById('auth-screen');
-    const appScreen = document.getElementById('app-screen');
-    const adminScreen = document.getElementById('admin-screen');
-
-    // Кнопки авторизации/регистрации
-    const loginBtn = document.getElementById('action-login-btn');
-    const registerBtn = document.getElementById('action-register-btn');
-    const logoutBtn = document.getElementById('logout-btn');
-    const adminLogoutBtn = document.getElementById('admin-logout-btn');
-    const sendBtn = document.getElementById('send-btn');
-
-    // Поля ввода
-    const loginUserInp = document.getElementById('login-username');
-    const loginPassInp = document.getElementById('login-password');
-    const regUserInp = document.getElementById('reg-username');
-    const regPassInp = document.getElementById('reg-password');
-    const regRepeatPassInp = document.getElementById('reg-repeat-password');
-    const targetBankIdInp = document.getElementById('target-bank-id');
-    const transferAmountInp = document.getElementById('transfer-amount');
-
-    // Текстовые ноды дешборда
-    const userLoginName = document.getElementById('user-login-name');
-    const userTechId = document.getElementById('user-tech-id');
-    const userBalance = document.getElementById('user-balance');
-    const historyList = document.getElementById('history-list');
-    const adminUsersList = document.getElementById('admin-users-list');
-
+document.addEventListener("DOMContentLoaded", () => {
     let currentUser = null;
 
-    // ПРИНУДИТЕЛЬНЫЙ ВЫВОД ФОРМЫ НА ЭКРАН ПРИ СТАРТЕ
-    if (authScreen) authScreen.classList.remove('hidden');
+    // Инициализация интерфейса
+    renderLawsCards(ROLES_AND_LAWS);
+    initThreeBackground();
 
-    // ОБНОВЛЕНИЕ ДАННЫХ КЛИЕНТА
-    async function refreshDashboard() {
-        if (!currentUser) return;
-        try {
-            const data = await window.CyberDB.getUserData(currentUser.username);
-            if (!data) return;
+    // Скрытие загрузчика
+    setTimeout(() => {
+        const loader = document.getElementById('preloader');
+        loader.style.opacity = '0';
+        setTimeout(() => loader.classList.add('hidden'), 600);
+    }, 1500);
 
-            // Проверка на лету — не забанен ли юзер кем-то через сеть
-            if(data.is_banned) {
-                alert(`ДОСТУП ЗАБЛОКИРОВАН.\nКод ошибки: ${data.ban_code || 'SECURITY_VIOLATION'}`);
-                performLogout();
-                return;
-            }
+    /* ================= ДИНАМИЧЕСКИЙ ПОИСК И КАРТОЧКИ (КАК НА СКРИНШОТЕ) ================= */
+    function renderLawsCards(data) {
+        const container = document.getElementById('laws-playground');
+        container.innerHTML = '';
+
+        data.forEach(section => {
+            const card = document.createElement('div');
+            card.className = 'law-card';
             
-            if(userBalance) userBalance.textContent = parseFloat(data.balance).toFixed(2);
-            if(userTechId) userTechId.textContent = data.tech_id;
-            if(userLoginName) userLoginName.textContent = data.username;
-
-            // Логи транзакций
-            const txs = await window.CyberDB.getTransactionHistory(data.username);
-            if (historyList) {
-                historyList.innerHTML = '';
-                if(txs.length === 0) {
-                    historyList.innerHTML = '<li><span style="color:#444">ЛОГИ ОПЕРАЦИЙ ПУСТЫ</span></li>';
-                }
-                txs.forEach(tx => {
-                    const li = document.createElement('li');
-                    const isSender = tx.sender === data.username;
-                    li.innerHTML = `
-                        <span>${isSender ? '➡️ ВЫВОД СРЕДСТВ' : '⬅️ ЗАЧИСЛЕНИЕ СЕТИ'} // Контрагент: ${isSender ? tx.receiver : tx.sender}</span>
-                        <span style="color: ${isSender ? '#ff3333' : '#00ff66'}">${isSender ? '-' : '+'}${tx.amount} ¤</span>
-                    `;
-                    historyList.appendChild(li);
-                });
-            }
-        } catch (err) {
-            console.error("Ошибка обновления терминала:", err);
-        }
-    }
-
-    // ОБНОВЛЕНИЕ ПАНЕЛИ АДМИНИСТРАТОРА (ВСЯ СЕТЬ)
-    async function refreshAdminPanel() {
-        if (!adminUsersList) return;
-        try {
-            const users = await window.CyberDB.getAllUsers();
-            adminUsersList.innerHTML = '';
-            users.forEach(u => {
-                const div = document.createElement('div');
-                div.className = 'admin-u-card';
-                div.innerHTML = `
-                    <p><strong>Пользователь сети:</strong> ${u.username} (ID: <span style="color:#00ffff">${u.tech_id}</span>)</p>
-                    <p>Баланс на счете: <span style="color:#00ff66">${parseFloat(u.balance).toFixed(2)} ¤</span></p>
-                    <p>Статус терминала: ${u.is_banned ? `<span style="color:#ff3333; font-weight:bold;">БАН [Код: ${u.ban_code}]</span>` : '<span style="color:#00ff66">АКТИВЕН</span>'}</p>
-                    <div class="admin-controls">
-                        <input type="number" placeholder="Сумма" id="amt-${u.id}" min="1">
-                        <button class="admin-btn" onclick="modifyBalance('${u.username}', 'amt-${u.id}', true)">НАЧИСЛИТЬ</button>
-                        <button class="admin-btn" onclick="modifyBalance('${u.username}', 'amt-${u.id}', false)">СПИСАТЬ</button>
-                        <button class="admin-btn" style="border-color:#ff3333; color:#ff3333;" onclick="admToggleBan('${u.username}', ${u.is_banned})">
-                            ${u.is_banned ? 'РАЗБАНИТЬ' : 'ЗАБАНИТЬ'}
-                        </button>
-                        <button class="admin-btn" style="border-color:#666; color:#666;" onclick="admDeleteUser('${u.username}')">УДАЛИТЬ</button>
+            let articlesHTML = '';
+            section.articles.forEach(art => {
+                articlesHTML += `
+                    <div class="article-item">
+                        <div class="article-title">${art.code}: ${art.name}</div>
+                        <div class="article-desc">${art.desc}</div>
+                        <div class="fine-badge ${art.isJail ? 'jail' : ''}">
+                            ${art.isJail ? '⛓️' : '💳'} ${art.fine}
+                        </div>
                     </div>
                 `;
-                adminUsersList.appendChild(div);
             });
-        } catch (err) {
-            console.error("Ошибка рендеринга админ-модуля:", err);
-        }
-    }
 
-    // ГЛОБАЛЬНЫЕ КЛИКИ АДМИНА ДЛЯ ТАБЛИЦЫ
-    window.modifyBalance = async (username, inputId, isGive) => {
-        const input = document.getElementById(inputId);
-        const amount = parseFloat(input.value);
-        if(isNaN(amount) || amount <= 0) return alert("Введите корректное число");
-        
-        await window.CyberDB.updateBalance(username, amount, isGive);
-        input.value = '';
-        refreshAdminPanel();
-    };
-
-    window.admToggleBan = async (username, currentBanStatus) => {
-        if (currentBanStatus) {
-            await window.CyberDB.unbanUser(username);
-        } else {
-            const code = prompt("Укажите код системной блокировки:", "TERMINAL_VIOLATION_403") || "ERR_403";
-            await window.CyberDB.banUser(username, code);
-        }
-        refreshAdminPanel();
-    };
-
-    window.admDeleteUser = async (username) => {
-        if (confirm(`Вы действительно хотите безвозвратно стереть ${username} из глобальной сети?`)) {
-            await window.CyberDB.deleteUser(username);
-            refreshAdminPanel();
-        }
-    };
-
-    // ОБРАБОТЧИКИ НАЖАТИЙ КНОПОК ПОЛЬЗОВАТЕЛЯ
-    loginBtn.addEventListener('click', async () => {
-        const user = loginUserInp.value.trim();
-        const pass = loginPassInp.value.trim();
-        if(!user || !pass) return alert("ОШИБКА: Заполните все поля авторизации!");
-
-        try {
-            const res = await window.CyberDB.loginUser(user, pass);
-            currentUser = res;
-            authScreen.classList.add('hidden');
-            
-            if (res.isAdmin) {
-                adminScreen.classList.remove('hidden');
-                refreshAdminPanel();
-            } else {
-                appScreen.classList.remove('hidden');
-                refreshDashboard();
-            }
-        } catch(err) {
-            alert(err.message);
-        }
-    });
-
-    registerBtn.addEventListener('click', async () => {
-        const user = regUserInp.value.trim();
-        const pass = regPassInp.value.trim();
-        const repPass = regRepeatPassInp.value.trim();
-
-        if(!user || !pass || !repPass) return alert("ОШИБКА: Все регистрационные поля должны быть заполнены!");
-        if(pass !== repPass) return alert("ОШИБКА: Введенные крипто-ключи не совпадают!");
-
-        try {
-            await window.CyberDB.registerUser(user, pass);
-            alert("РЕГИСТРАЦИЯ ЗАВЕРШЕНА СУКСЕССЛИ.\nИдентификатор создан в облаке. Используйте форму входа.");
-            regUserInp.value = '';
-            regPassInp.value = '';
-            regRepeatPassInp.value = '';
-        } catch(err) {
-            alert(err.message);
-        }
-    });
-
-    sendBtn.addEventListener('click', async () => {
-        const targetId = targetBankIdInp.value.trim();
-        const amount = parseFloat(transferAmountInp.value);
-        
-        if(!targetId || isNaN(amount) || amount <= 0) {
-            return alert("ОШИБКА: Некорректные параметры проведения транзакции!");
-        }
-
-        try {
-            await window.CyberDB.transferFunds(currentUser.username, targetId, amount);
-            alert("МЕЖБАНКОВСКИЙ ПЕРЕВОД ВЫПОЛНЕН УСПЕШНО!");
-            targetBankIdInp.value = '';
-            transferAmountInp.value = '';
-            refreshDashboard();
-        } catch(err) {
-            alert(err.message);
-        }
-    });
-
-    function performLogout() {
-        currentUser = null;
-        appScreen.classList.add('hidden');
-        adminScreen.classList.add('hidden');
-        authScreen.classList.remove('hidden');
-        loginUserInp.value = '';
-        loginPassInp.value = '';
-    }
-
-    logoutBtn.addEventListener('click', performLogout);
-    adminLogoutBtn.addEventListener('click', performLogout);
-
-    // ФУНКЦИЯ СКРИПТА ДЛЯ СБОРКИ 3D ЗЕМЛИ (THREE.JS)
-    function initThreeBackground() {
-        const container = document.getElementById('three-bg-container');
-        if(!container) return;
-
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.z = 4;
-
-        const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        container.appendChild(renderer.domElement);
-
-        // Создаем каркасную неоновую планету Земля
-        const geometry = new THREE.SphereGeometry(1.8, 24, 24);
-        const material = new THREE.MeshBasicMaterial({
-            color: 0x00ff66,
-            wireframe: true,
-            transparent: true,
-            opacity: 0.15
+            card.innerHTML = `
+                <div class="law-card-header">
+                    <span class="law-icon">${section.icon}</span>
+                    <h3>${section.title}</h3>
+                </div>
+                ${articlesHTML}
+            `;
+            container.appendChild(card);
         });
-        const earth = new THREE.Mesh(geometry, material);
-        scene.add(earth);
+    }
 
-        // Атмосферные частицы вокруг
-        const starsGeom = new THREE.BufferGeometry();
-        const starsCount = 250;
-        const starPositions = new Float32Array(starsCount * 3);
+    // Живой поиск по строке ввода
+    document.getElementById('global-search').addEventListener('input', (e) => {
+        const query = e.target.value.toLowerCase().trim();
+        
+        const filtered = ROLES_AND_LAWS.map(section => {
+            const matchedArticles = section.articles.filter(art => 
+                art.name.toLowerCase().includes(query) || 
+                art.code.toLowerCase().includes(query) || 
+                art.desc.toLowerCase().includes(query) ||
+                art.fine.toLowerCase().includes(query)
+            );
+            
+            if (section.title.toLowerCase().includes(query) || matchedArticles.length > 0) {
+                return {
+                    ...section,
+                    articles: matchedArticles.length > 0 ? matchedArticles : section.articles
+                };
+            }
+            return null;
+        }).filter(item => item !== null);
 
-        for(let i=0; i < starsCount * 3; i++) {
-            starPositions[i] = (Math.random() - 0.5) * 10;
+        renderLawsCards(filtered);
+    });
+
+    /* ================= ЛОГИКА ОКНА УПРАВЛЕНИЯ И АВТОРИЗАЦИИ ================= */
+    const overlay = document.getElementById('modal-overlay');
+    const authBlock = document.getElementById('auth-card-block');
+    const dashBlock = document.getElementById('dashboard-card-block');
+    const adminBlock = document.getElementById('admin-card-block');
+
+    document.getElementById('trigger-auth-btn').addEventListener('click', () => {
+        overlay.classList.remove('hidden');
+        if (currentUser) {
+            if (currentUser.isAdmin) { openAdminPanel(); } else { openUserDash(); }
+        } else {
+            authBlock.classList.remove('hidden');
+        }
+    });
+
+    // Переключение Вход / Регистрация
+    const tLogin = document.getElementById('tab-login');
+    const tReg = document.getElementById('tab-register');
+    const fLogin = document.getElementById('login-form');
+    const fReg = document.getElementById('register-form');
+
+    tLogin.addEventListener('click', () => { tLogin.classList.add('active'); tReg.classList.remove('active'); fLogin.classList.remove('hidden'); fReg.classList.add('hidden'); });
+    tReg.addEventListener('click', () => { tReg.classList.add('active'); tLogin.classList.remove('active'); fReg.classList.remove('hidden'); fLogin.classList.add('hidden'); });
+
+    // Закрытие окон
+    const closeModalElements = ['close-modal', 'close-dash', 'close-admin', 'modal-overlay'];
+    closeModalElements.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.addEventListener('click', (e) => {
+                if (e.target.id === id || el.classList.contains('close-modal-btn')) {
+                    overlay.classList.add('hidden');
+                }
+            });
+        }
+    });
+
+    /* ================= ВЗАИМОДЕЙСТВИЕ С БАЗОЙ ДАННЫХ SUPABASE ================= */
+    // Регистрация
+    fReg.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const user = document.getElementById('reg-username').value.trim();
+        const p1 = document.getElementById('reg-password').value;
+        const p2 = document.getElementById('reg-password-repeat').value;
+
+        if (p1 !== p2) return showToast("Пароли не совпадают!", "error");
+
+        showToast("Синхронизация с облаком...", "info");
+        const res = await Database.registerUser(user, p1);
+        if (res.success) {
+            showToast(`Успешно! Ваш ID: ${res.user.id}`, "success");
+            fReg.reset();
+            tLogin.click();
+        } else { showToast(res.message, "error"); }
+    });
+
+    // Логин
+    fLogin.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const user = document.getElementById('login-username').value.trim();
+        const p = document.getElementById('login-password').value;
+
+        showToast("Авторизация терминала...", "info");
+        const res = await Database.loginUser(user, p);
+        if (res.success) {
+            currentUser = res.user;
+            authBlock.classList.add('hidden');
+            updateHeaderNavZone();
+            if (currentUser.isAdmin) { openAdminPanel(); } else { openUserDash(); }
+        } else {
+            if (res.isBanned) document.getElementById('ban-screen').classList.remove('hidden');
+            else showToast(res.message, "error");
+        }
+    });
+
+    // Перевод денег
+    document.getElementById('transfer-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const target = document.getElementById('transfer-target').value.trim();
+        const sum = document.getElementById('transfer-sum').value;
+
+        showToast("Процессинг транзакции...", "info");
+        const res = await Database.executeTransaction(currentUser.id, target, sum);
+        if (res.success) {
+            showToast("Перевод успешно завершен!", "success");
+            document.getElementById('transfer-form').reset();
+            await syncCurrentUserData();
+        } else { showToast(res.message, "error"); }
+    });
+
+    async function syncCurrentUserData() {
+        if (!currentUser) return;
+        const fresh = await Database.getUserById(currentUser.id);
+        if (!fresh || fresh.isBanned) { window.location.reload(); return; }
+        
+        document.getElementById('dash-balance-amount').innerText = parseFloat(fresh.balance).toLocaleString();
+        await renderTxHistoryHTML();
+    }
+
+    async function renderTxHistoryHTML() {
+        const allTx = await Database.getTransactions();
+        const rows = document.getElementById('tx-history-rows');
+        rows.innerHTML = '';
+
+        const mine = allTx.filter(t => t.senderId === currentUser.id || t.receiverId === currentUser.id);
+        if (mine.length === 0) {
+            rows.innerHTML = `<tr><td style="color:var(--text-muted); text-align:center;">История пуста</td></tr>`;
+            return;
         }
 
-        starsGeom.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
-        const starsMat = new THREE.PointsMaterial({ color: 0x00ffff, size: 0.03, transparent: true, opacity: 0.6 });
-        const starField = new THREE.Points(starsGeom, starsMat);
-        scene.add(starField);
+        mine.forEach(t => {
+            const isIn = t.receiverId === currentUser.id;
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td style="color:${isIn ? 'var(--neon-green)' : 'var(--neon-red)'}">${isIn ? '⚡ IN' : '🔻 OUT'}</td>
+                <td>${isIn ? t.senderName : t.receiverName}</td>
+                <td style="text-align:right; font-weight:700;">${isIn ? '+' : '-'}${parseFloat(t.amount).toLocaleString()}</td>
+            `;
+            rows.appendChild(tr);
+        });
+    }
 
-        // Анимация вращения через GPU
-        function animate() {
-            requestAnimationFrame(animate);
-            earth.rotation.y += 0.0012;
-            earth.rotation.x += 0.0003;
-            starField.rotation.y -= 0.0005;
+    function openUserDash() {
+        dashBlock.classList.remove('hidden');
+        adminBlock.classList.add('hidden');
+        document.getElementById('dash-username').innerText = currentUser.username.toUpperCase();
+        document.getElementById('dash-bank-id').innerText = currentUser.id;
+        syncCurrentUserData();
+    }
+
+    function updateHeaderNavZone() {
+        const zone = document.getElementById('auth-zone');
+        if (currentUser) {
+            zone.innerHTML = `<button class="nav-login-btn" style="border-color:var(--neon-cyan); color:var(--neon-cyan)" id="nav-profile-btn">${currentUser.username.toUpperCase()}</button>`;
+            document.getElementById('nav-profile-btn').addEventListener('click', () => {
+                overlay.classList.remove('hidden');
+                if (currentUser.isAdmin) openAdminPanel(); else openUserDash();
+            });
+        }
+    }
+
+    /* ================= МОДУЛЬ АДМИНИСТРАТОРА ================= */
+    async function openAdminPanel() {
+        adminBlock.classList.remove('hidden');
+        dashBlock.classList.add('hidden');
+        await syncAdminDataRows();
+    }
+
+    async function syncAdminDataRows() {
+        const users = await Database.getUsers();
+        const tbody = document.getElementById('admin-users-rows');
+        tbody.innerHTML = '';
+
+        users.forEach(u => {
+            if (u.isAdmin) return;
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td style="color:var(--neon-gold)">${u.id}</td>
+                <td><b>${u.username}</b></td>
+                <td>${parseFloat(u.balance).toLocaleString()} N$</td>
+                <td style="color:${u.isBanned ? 'var(--neon-red)' : 'var(--neon-green)'}">${u.isBanned ? 'BANNED' : 'ACTIVE'}</td>
+                <td>
+                    <button class="admin-btn-inline" onclick="triggerAdminControl('give', '${u.id}')">+$</button>
+                    <button class="admin-btn-inline" style="color:var(--neon-red)" onclick="triggerAdminControl('ban', '${u.id}', ${u.isBanned})">
+                        ${u.isBanned ? 'UNBAN' : 'BAN'}
+                    </button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    window.triggerAdminControl = async function(action, id, state) {
+        if (action === 'give') {
+            const cash = prompt("Укажите сумму начисления:");
+            if (!cash || isNaN(cash)) return;
+            const user = await Database.getUserById(id);
+            await Database.adminUpdateUser(id, { balance: parseFloat(user.balance) + parseFloat(cash) });
+            showToast("Баланс изменен", "success");
+        } else if (action === 'ban') {
+            await Database.adminUpdateUser(id, { isBanned: !state });
+            showToast("Статус аккаунта изменен", "info");
+        }
+        await syncAdminDataRows();
+    };
+
+    // Выходы
+    const logoutAction = () => { currentUser = null; window.location.reload(); };
+    document.getElementById('logout-btn').addEventListener('click', logoutAction);
+    document.getElementById('admin-logout-btn').addEventListener('click', logoutAction);
+    document.getElementById('ban-close-app').addEventListener('click', logoutAction);
+
+    /* ================= ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ================= */
+    function showToast(text, type = "info") {
+        const box = document.getElementById('notify-box');
+        const t = document.createElement('div');
+        t.className = `toast ${type}`;
+        t.innerText = text;
+        box.appendChild(t);
+        setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 3500);
+    }
+
+    // Реалтайм-обновление (Цикл опроса БД раз в 5 секунд)
+    setInterval(async () => {
+        if (!currentUser) return;
+        if (currentUser.isAdmin) { await syncAdminDataRows(); } else { await syncCurrentUserData(); }
+    }, 5000);
+
+    /* ================= 3D ЭФФЕКТЫ THREE.JS ================= */
+    function initThreeBackground() {
+        const host = document.getElementById('canvas-container');
+        const scene = new THREE.Scene();
+        scene.fog = new THREE.FogExp2(0x040907, 0.012);
+
+        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.z = 170;
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        host.appendChild(renderer.domElement);
+
+        const lightGreen = new THREE.DirectionalLight(0x00ff96, 0.6);
+        lightGreen.position.set(60, 40, 40);
+        scene.add(lightGreen);
+
+        const lightCyan = new THREE.DirectionalLight(0x00f0ff, 0.4);
+        lightCyan.position.set(-60, -40, -40);
+        scene.add(lightCyan);
+
+        // Кибер-сфера (AAA Wireframe стиль)
+        const geo = new THREE.SphereGeometry(65, 40, 40);
+        const mat = new THREE.MeshBasicMaterial({ color: 0x00ff96, wireframe: true, transparent: true, opacity: 0.15 });
+        const sphere = new THREE.Mesh(geo, mat);
+        scene.add(sphere);
+
+        // Облако движущихся частиц (Субтитры космоса)
+        const partGeo = new THREE.BufferGeometry();
+        const count = 400;
+        const positions = new Float32Array(count * 3);
+        for(let i=0; i<count*3; i++) positions[i] = (Math.random() - 0.5) * 400;
+        partGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        
+        const partMat = new THREE.PointsMaterial({ color: 0x00f0ff, size: 1.5, transparent: true, opacity: 0.5 });
+        const particles = new THREE.Points(partGeo, partMat);
+        scene.add(particles);
+
+        function renderLoop() {
+            requestAnimationFrame(renderLoop);
+            sphere.rotation.y += 0.001;
+            sphere.rotation.x += 0.0002;
+            particles.rotation.y -= 0.0003;
             renderer.render(scene, camera);
         }
-        animate();
+        renderLoop();
 
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
