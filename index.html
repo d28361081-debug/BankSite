@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="config.js"></script>
+    <script src="supabase.js"></script>
 </head>
 <body>
 
@@ -46,7 +46,7 @@
                 <button class="tab-btn" onclick="switchAuthTab('register')">REGISTER</button>
             </div>
 
-            <form id="login-form" class="auth-form active" onsubmit="handleLogin(e)">
+            <form id="login-form" class="auth-form active">
                 <div class="input-group">
                     <label>USER NODE IDENTIFIER</label>
                     <input type="text" id="login-username" required placeholder="Enter username..." autocomplete="off">
@@ -58,7 +58,7 @@
                 <button type="submit" class="cyber-btn green-glow">ENGAGE INITIALIZATION</button>
             </form>
 
-            <form id="register-form" class="auth-form" onsubmit="handleRegister(e)">
+            <form id="register-form" class="auth-form">
                 <div class="input-group">
                     <label>CREATE NEW NODE NAME</label>
                     <input type="text" id="reg-username" required placeholder="Username..." autocomplete="off">
@@ -98,7 +98,7 @@
                     <div class="balance-text green-neon" id="user-balance">0.00 ฿</div>
                 </div>
 
-                <form id="transfer-form" onsubmit="handleTransfer(e)">
+                <form id="transfer-form">
                     <div style="font-family:'Orbitron'; font-size:0.9rem; font-weight:700; margin-bottom:15px; color:var(--neon-accent);">// QUANTUM_CREDIT_TRANSFER</div>
                     <div class="input-group">
                         <label>DESTINATION BANK ID</label>
@@ -167,7 +167,8 @@
                                     <th>BANK ID</th>
                                     <th>BALANCE</th>
                                     <th>STATUS</th>
-                                    <th>ACTION</th> </tr>
+                                    <th>ACTION</th>
+                                </tr>
                             </thead>
                             <tbody id="admin-user-table">
                                 </tbody>
