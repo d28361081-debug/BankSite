@@ -76,7 +76,7 @@ function init3DEngine() {
 }
 
 // ==========================================
-// NOTIFICATIONS MATRIX
+// NOTIFICATIONS
 // ==========================================
 function showCyberAlert(type, title, message) {
     const zone = document.getElementById('cyber-notification-zone');
@@ -101,7 +101,7 @@ function showCyberAlert(type, title, message) {
 }
 
 // ==========================================
-// MATRIX THEMES
+// THEMES
 // ==========================================
 function changeMatrixTheme(themeName, element) {
     document.body.className = '';
@@ -130,25 +130,17 @@ function changeMatrixTheme(themeName, element) {
 }
 
 // ==========================================
-// HARDCORE PANEL SWITCHER (FIX FOR OVERLAPS)
+// ТВОЙ ОРИГИНАЛЬНЫЙ ПЕРЕКЛЮЧАТЕЛЬ ПАНЕЛЕЙ
 // ==========================================
 function showActivePanel(panelId) {
-    const panels = ['auth-panel', 'user-dashboard', 'admin-dashboard', 'ban-panel'];
-    
-    panels.forEach(id => {
-        const p = document.getElementById(id);
-        if (p) {
-            p.style.display = 'none';
-            p.classList.remove('active');
-        }
+    const allPanels = document.querySelectorAll('.panel');
+    allPanels.forEach(panel => {
+        panel.classList.remove('active');
     });
 
-    const target = document.getElementById(panelId);
-    if (target) {
-        target.style.display = 'block';
-        setTimeout(() => {
-            target.classList.add('active');
-        }, 10);
+    const targetPanel = document.getElementById(panelId);
+    if (targetPanel) {
+        targetPanel.classList.add('active');
     }
 }
 
@@ -166,7 +158,7 @@ function switchAuthTab(tab) {
 }
 
 // ==========================================
-// SUPABASE SECURE AUTHORIZATION
+// SUPABASE AUTHENTICATION
 // ==========================================
 async function handleRegister(event) {
     event.preventDefault();
@@ -218,7 +210,6 @@ async function handleLogin(event) {
     const user = document.getElementById('login-username').value.trim();
     const pass = document.getElementById('login-password').value;
 
-    // Сверхзащищенный хардкод админа
     if (user === 'admin21') {
         if (pass === 'admin210412') {
             currentUser = { username: 'admin21', bank_id: '99999999', balance: 999999999, is_admin: true, is_banned: false };
@@ -265,7 +256,7 @@ async function handleLogin(event) {
 }
 
 // ==========================================
-// USER DASHBOARD MATRIX
+// USER DASHBOARD
 // ==========================================
 function initUserDashboard() {
     showActivePanel('user-dashboard');
@@ -354,7 +345,7 @@ async function handleTransfer(event) {
 }
 
 // ==========================================
-// MASTER CONTROL DASHBOARD (ADMIN)
+// ADMIN CONTROL MODULE
 // ==========================================
 async function initAdminDashboard() {
     showActivePanel('admin-dashboard');
@@ -411,7 +402,7 @@ async function executeAdminAction(action) {
         } else if (action === 'remove' && amount > 0) {
             let bal = Math.max(0, parseFloat(targetUser.balance) - amount);
             await _supabase.from('users').update({ balance: bal }).eq('id', targetUser.id);
-        } else if (action === 'banned' || action === 'ban') {
+        } else if (action === 'ban') {
             await _supabase.from('users').update({ is_banned: true }).eq('bank_id', targetId);
         } else if (action === 'unban') {
             await _supabase.from('users').update({ is_banned: false }).eq('bank_id', targetId);
@@ -430,19 +421,18 @@ function logout() {
 }
 
 // ==========================================
-// CORE INITIALIZATION
+// INITIALIZATION
 // ==========================================
 window.addEventListener('DOMContentLoaded', () => {
     init3DEngine();
     
-    // Плавное скрытие стартового прелоадера
     setTimeout(() => {
         const loader = document.getElementById('preloader');
         if (loader) {
             loader.style.opacity = '0';
             setTimeout(() => loader.style.display = 'none', 600);
         }
-    }, 1200);
+    }, 1500);
 
     const cursor = document.getElementById('cursor-glow');
     if (cursor) {
