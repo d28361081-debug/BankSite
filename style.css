@@ -41,7 +41,7 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 90px 20px 40px 20px; /* Безопасный отступ сверху для панели тем */
+    padding: 90px 20px 40px 20px;
     position: relative;
 }
 
@@ -56,7 +56,7 @@ body {
 }
 
 /* ==========================================
-   ФИКС ЭКРАНА ЗАГРУЗКИ (ПРЕЛОАДЕР)
+   ФИКС ЭКРАНА ЗАГРУЗКИ (ПРЕЛОАДЕР ПО ЦЕНТРУ)
    ========================================== */
 #preloader {
     position: fixed;
@@ -118,7 +118,7 @@ body {
 }
 
 /* ==========================================
-   ОСНОВНОЙ КОНТЕЙНЕР И СЕТКА ПК
+   ОСНОВНАЯ СЕТКА И КОНТЕЙНЕРЫ
    ========================================== */
 #app-container {
     position: relative;
@@ -158,25 +158,16 @@ body {
     padding: 40px;
 }
 
-/* ДЕСКТОП СЕТКА: Разделение ЛК и Логов */
 .dashboard-grid {
     display: grid;
     grid-template-columns: 1.2fr 1fr;
-    gap: 30px; /* Зазор между левой панелью переводов и логами */
+    gap: 30px;
     align-items: start;
 }
 
 /* ==========================================
-   КНОПКИ И ФИКС ОТСТУПОВ МЕЖДУ НИМИ НА ПК
+   ЖЕСТКИЙ ФИКС ДЛЯ КНОПОК НА ПК (ОТСТУПЫ)
    ========================================== */
-.btn-container {
-    display: flex;
-    flex-direction: column;
-    gap: 15px; /* ЖЕСТКИЙ ФИКС: Гарантирует 15px расстояния между кнопками на ПК */
-    width: 100%;
-    margin-top: 10px;
-}
-
 .cyber-btn {
     width: 100%;
     background: transparent;
@@ -191,6 +182,11 @@ body {
     letter-spacing: 1px;
     transition: all 0.3s;
     display: block;
+    margin-bottom: 15px !important; /* Принудительный отступ снизу между кнопками на ПК */
+}
+
+.cyber-btn:last-child {
+    margin-bottom: 0 !important; /* Убираем отступ у последней кнопки в блоке */
 }
 
 .cyber-btn:hover {
@@ -199,120 +195,65 @@ body {
     box-shadow: 0 0 30px var(--neon-accent);
 }
 
-.cyber-btn.red-glow { border-color: var(--neon-red); box-shadow: 0 0 15px var(--neon-red-glow); }
-.cyber-btn.red-glow:hover { background: var(--neon-red); color: #fff; }
-
-/* ==========================================
-   ФОРМЫ И ИНПУТЫ
-   ========================================== */
-.input-group {
-    margin-bottom: 20px;
-    width: 100%;
+.cyber-btn.red-glow { 
+    border-color: var(--neon-red) !important; 
+    box-shadow: 0 0 15px var(--neon-red-glow) !important; 
 }
-
-.input-group label {
-    display: block;
-    font-size: 0.75rem;
-    color: var(--text-muted);
-    margin-bottom: 8px;
-    letter-spacing: 1.5px;
-    font-weight: 600;
-}
-
-input {
-    width: 100%;
-    background: rgba(2,2,8,0.85);
-    border: 1px solid rgba(255,255,255,0.08);
-    padding: 15px;
-    color: #fff;
-    border-radius: 8px;
-    font-size: 1rem;
-    font-family: 'Orbitron', sans-serif;
-}
-
-input:focus {
-    outline: none;
-    border-color: var(--neon-accent);
-    box-shadow: 0 0 15px var(--neon-glow);
+.cyber-btn.red-glow:hover { 
+    background: var(--neon-red) !important; 
+    color: #fff !important; 
 }
 
 /* ==========================================
-   ВХОД / АВТОРИЗАЦИЯ
+   АДМИНКА: РАССТОЯНИЕ МЕЖДУ КНОПКАМИ ДЕЙСТВИЙ
    ========================================== */
-#auth-panel {
-    max-width: 460px;
-    margin: 0 auto;
-}
-
-.auth-tabs {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-    margin-bottom: 25px;
-}
-
-.tab-btn {
-    background: rgba(255,255,255,0.02);
-    border: 1px solid rgba(255,255,255,0.08);
-    color: var(--text-muted);
-    padding: 14px;
-    cursor: pointer;
-    font-weight: 700;
-    border-radius: 8px;
-    transition: all 0.3s;
-}
-
-.tab-btn.active, .tab-btn:hover {
-    background: rgba(0,255,102,0.05);
-    border-color: var(--neon-accent);
-    color: #fff;
-    text-shadow: 0 0 8px var(--neon-accent);
-}
-
-.auth-form { display: none; }
-.auth-form.active { display: block; }
-
-/* ИНФОРМАЦИЯ О СЧЕТЕ */
-.meta-label { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 6px; letter-spacing: 1px; }
-.meta-value { font-family: 'Orbitron', sans-serif; font-size: 1.5rem; font-weight: 700; margin-bottom: 25px; }
-
-.balance-box {
-    background: rgba(0,0,0,0.4);
-    padding: 25px;
-    border-radius: 12px;
-    margin-bottom: 30px;
-    border: 1px solid rgba(255,255,255,0.03);
-}
-
-.balance-text {
-    font-family: 'Orbitron', sans-serif;
-    font-size: 2.5rem;
-    font-weight: 900;
-    color: var(--neon-accent);
-    text-shadow: 0 0 20px var(--neon-glow);
-    text-align: center;
-}
-
-/* ЛОГИ / ИСТОРИЯ */
-.ledger-container { max-height: 400px; overflow-y: auto; }
-.ledger-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 16px;
-    background: rgba(255,255,255,0.02);
-    border-left: 4px solid #64748b;
-    margin-bottom: 14px;
-    border-radius: 0 8px 8px 0;
-}
-
-/* АДМИН ПАНЕЛЬ */
 .admin-grid {
     display: grid;
     grid-template-columns: 1fr 1.3fr;
-    gap: 30px;
+    gap: 35px;
+    align-items: start;
 }
 
+/* Разделяем пары кнопок управления в админке */
+.admin-btn-group {
+    display: flex;
+    flex-direction: column;
+    gap: 15px !important; /* Вертикальный зазор между блоками кнопок */
+}
+
+.admin-btn-group .cyber-btn {
+    margin-bottom: 0 !important; /* Передаем контроль отступов родителю gap */
+}
+
+/* ==========================================
+   ФИКС КНОПКИ DELETE (ВОЗВРАЩАЕМ НЕОНОВЫЙ КРАСНЫЙ)
+   ========================================== */
+button.terminate-btn, .terminate-btn {
+    background: transparent !important;
+    border: 1px solid var(--neon-red) !important;
+    color: var(--neon-red) !important;
+    padding: 8px 16px !important;
+    cursor: pointer !important;
+    border-radius: 6px !important;
+    font-weight: 700 !important;
+    font-family: 'Orbitron', sans-serif !important;
+    font-size: 0.8rem !important;
+    text-shadow: 0 0 5px var(--neon-red-glow) !important;
+    box-shadow: 0 0 8px var(--neon-red-glow) !important;
+    transition: all 0.2s ease-in-out !important;
+    display: inline-block !important;
+}
+
+button.terminate-btn:hover, .terminate-btn:hover {
+    background: var(--neon-red) !important;
+    color: #ffffff !important;
+    box-shadow: 0 0 20px var(--neon-red) !important;
+    text-shadow: none !important;
+}
+
+/* ==========================================
+   ТАБЛИЦЫ, ИНПУТЫ И ИНТЕРФЕЙС
+   ========================================== */
 .table-wrapper {
     overflow-x: auto;
     background: rgba(0,0,0,0.3);
@@ -321,35 +262,38 @@ input:focus {
 }
 
 table { width: 100%; border-collapse: collapse; }
-th, td { padding: 14px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.04); }
-th { font-family: 'Orbitron', sans-serif; font-size: 0.85rem; color: var(--text-muted); }
+th, td { padding: 12px 14px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.04); }
+th { font-family: 'Orbitron', sans-serif; font-size: 0.85rem; color: var(--text-muted); background: rgba(255,255,255,0.02); }
+td { font-size: 0.95rem; vertical-align: middle; }
 
-/* ==========================================
-   ВЕРХНЯЯ ПАНЕЛЬ ВЫБОРА ТЕМЫ
-   ========================================== */
-.theme-selector {
-    position: absolute;
-    top: 25px; 
-    right: 25px; 
-    z-index: 1000;
-    background: rgba(6,10,26,0.95); 
-    padding: 10px 18px; 
-    border-radius: 30px;
-    border: 1px solid var(--glass-border); 
-    display: flex; 
-    align-items: center; 
-    gap: 12px;
-}
+.input-group { margin-bottom: 20px; width: 100%; }
+.input-group label { display: block; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 8px; letter-spacing: 1.5px; font-weight: 600; }
+input { width: 100%; background: rgba(2,2,8,0.85); border: 1px solid rgba(255,255,255,0.08); padding: 15px; color: #fff; border-radius: 8px; font-size: 1rem; font-family: 'Orbitron', sans-serif; }
+input:focus { outline: none; border-color: var(--neon-accent); box-shadow: 0 0 15px var(--neon-glow); }
+
+.auth-panel { max-width: 460px; margin: 0 auto; }
+.auth-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 25px; }
+.tab-btn { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); color: var(--text-muted); padding: 14px; cursor: pointer; font-weight: 700; border-radius: 8px; transition: all 0.3s; }
+.tab-btn.active, .tab-btn:hover { background: rgba(0,255,102,0.05); border-color: var(--neon-accent); color: #fff; text-shadow: 0 0 8px var(--neon-accent); }
+
+.meta-label { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 6px; letter-spacing: 1px; }
+.meta-value { font-family: 'Orbitron', sans-serif; font-size: 1.5rem; font-weight: 700; margin-bottom: 25px; }
+.balance-box { background: rgba(0,0,0,0.4); padding: 25px; border-radius: 12px; margin-bottom: 30px; border: 1px solid rgba(255,255,255,0.03); }
+.balance-text { font-family: 'Orbitron', sans-serif; font-size: 2.5rem; font-weight: 900; color: var(--neon-accent); text-shadow: 0 0 20px var(--neon-glow); text-align: center; }
+
+.ledger-container { max-height: 400px; overflow-y: auto; }
+.ledger-item { display: flex; justify-content: space-between; align-items: center; padding: 16px; background: rgba(255,255,255,0.02); border-left: 4px solid #64748b; margin-bottom: 14px; border-radius: 0 8px 8px 0; }
+
+/* ПАНЕЛЬ ТЕМЫ */
+.theme-selector { position: absolute; top: 25px; right: 25px; z-index: 1000; background: rgba(6,10,26,0.95); padding: 10px 18px; border-radius: 30px; border: 1px solid var(--glass-border); display: flex; align-items: center; gap: 12px; }
 .theme-dot { width: 14px; height: 14px; border-radius: 50%; cursor: pointer; }
 .dot-green { background: #00ff66; }
 .dot-cyan { background: #00f0ff; }
 .dot-pink { background: #ff00ff; }
-
-/* УВЕДОМЛЕНИЯ */
 #cyber-notification-zone { position: fixed; bottom: 25px; right: 25px; z-index: 100000; display: flex; flex-direction: column; gap: 12px; }
 
 /* ==========================================
-   АДАТИВНОСТЬ: МОБИЛЬНЫЕ УСТРОЙСТВА
+   АДАПТИВНОСТЬ ДЛЯ СМАРТФОНОВ
    ========================================== */
 @media screen and (max-width: 860px) {
     .dashboard-grid, .admin-grid {
@@ -359,22 +303,11 @@ th { font-family: 'Orbitron', sans-serif; font-size: 0.85rem; color: var(--text-
 }
 
 @media screen and (max-width: 480px) {
-    body {
-        padding: 110px 12px 30px 12px;
-    }
-
+    body { padding: 110px 12px 30px 12px; }
     .logo-text { font-size: 2.1rem; }
-
-    .theme-selector {
-        position: fixed;
-        top: 20px; 
-        left: 50%; 
-        right: auto;
-        transform: translateX(-50%); 
-        width: calc(100% - 40px);
-        max-width: 340px; 
-        justify-content: center;
-    }
-
+    .theme-selector { position: fixed; top: 20px; left: 50%; right: auto; transform: translateX(-50%); width: calc(100% - 40px); max-width: 340px; justify-content: center; }
     .card { padding: 30px 18px !important; }
+    
+    th, td { padding: 10px 6px; font-size: 0.78rem; }
+    th { font-size: 0.7rem; }
 }
