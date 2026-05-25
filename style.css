@@ -173,7 +173,6 @@ body {
     z-index: -1;
 }
 
-/* ГЛАВНЫЙ КОНТЕЙНЕР (РАСШИРИЛИ ДО 1450px ДЛЯ СВОБОДЫ ЭЛЕМЕНТОВ) */
 #app-container {
     width: 100%;
     max-width: 1450px;
@@ -345,6 +344,7 @@ body {
     outline: none;
     border-radius: 6px;
     transition: all 0.3s;
+    width: 100%;
 }
 .input-group input:focus {
     border-color: var(--neon-color);
@@ -389,13 +389,15 @@ body {
 .dashboard-layout { display: none !important; grid-template-columns: 1fr 1fr; gap: 30px; }
 .panel.dashboard-layout.active { display: grid !important; }
 
-.dash-column { display: flex; flex-direction: column; gap: 30px; }
+.dash-column { display: flex; flex-direction: column; gap: 30px; min-width: 0; }
 .card {
     background: var(--card-bg);
     border: 1px solid rgba(255, 255, 255, 0.03);
     padding: 25px;
     border-radius: 8px;
     position: relative;
+    width: 100%;
+    overflow: hidden; /* Фикс вылезания текста наружу карточек */
 }
 
 .card-header { display: flex; align-items: center; gap: 20px; margin-bottom: 25px; }
@@ -406,6 +408,7 @@ body {
     border-radius: 50%;
     background: radial-gradient(circle, var(--neon-glow) 0%, transparent 70%);
     transition: border 0.4s ease;
+    flex-shrink: 0;
 }
 .badge {
     font-size: 0.7rem;
@@ -419,12 +422,14 @@ body {
 }
 
 .label { font-size: 0.75rem; color: #6a7e96; letter-spacing: 1px; margin-bottom: 5px; }
+
 .bank-id-text {
     font-family: 'Orbitron', sans-serif;
     font-size: 2rem;
     font-weight: 700;
     margin-bottom: 25px;
     letter-spacing: 1px;
+    word-wrap: break-word;
 }
 
 .balance-box {
@@ -434,15 +439,22 @@ body {
     border-radius: 6px;
     text-align: center;
     margin-top: 5px;
+    width: 100%;
+    overflow: hidden;
 }
-.balance-text { font-family: 'Orbitron', sans-serif; font-size: 2.5rem; font-weight: 900; }
+.balance-text { 
+    font-family: 'Orbitron', sans-serif; 
+    font-size: 2.5rem; 
+    font-weight: 900;
+    white-space: nowrap;
+}
 
 .sub-label { font-size: 0.85rem; color: #5c6f84; margin-top: -15px; margin-bottom: 20px; }
 .ledger-container { height: 350px; overflow-y: auto; }
 .no-tx { color: #5c6f84; text-align: center; font-family: 'Orbitron'; margin-top: 40px; font-size: 0.9rem; }
 
 /* ==========================================
-   ИСПРАВЛЕННАЯ АДМИН-ПАНЕЛЬ (БЕЗ ПОЛОСЫ ПРОКРУТКИ)
+   ФИКС АДМИН-ПАНЕЛИ (БЕЗ СЪЕЗЖАНИЯ КОРОВОК)
    ========================================== */
 .admin-layout { 
     display: none !important; 
@@ -471,7 +483,6 @@ body {
     font-size: 0.85rem; 
 }
 
-/* Пропорции 1fr к 1.5fr на широком экране дают таблице больше пространства */
 .admin-grid { 
     display: grid; 
     grid-template-columns: 1fr 1.5fr; 
@@ -492,7 +503,6 @@ body {
     overflow: hidden;
 }
 
-/* Обертка таблицы: убрали принудительное переваливание, полоска появляется только если экран экстремально мал */
 .table-wrapper { 
     height: 350px; 
     overflow-y: auto; 
@@ -504,11 +514,10 @@ body {
 table { 
     width: 100%; 
     border-collapse: collapse; 
-    table-layout: auto;
 }
 
 th, td { 
-    padding: 14px 16px; /* Чуть увеличили отступы для красоты */
+    padding: 14px 16px; 
     text-align: left; 
     border-bottom: 1px solid rgba(255, 255, 255, 0.03); 
     white-space: nowrap; 
@@ -531,12 +540,10 @@ th {
     font-size: 0.75rem;
     cursor: pointer;
     border-radius: 2px;
-    transition: all 0.2s ease;
 }
 .purge-btn:hover { 
     background: var(--neon-red) !important; 
     color: #fff !important; 
-    box-shadow: 0 0 10px var(--neon-red);
 }
 
 /* БАН-ПАНЕЛЬ */
@@ -545,22 +552,63 @@ th {
 .ban-desc { color: #5c6f84; }
 
 /* ==========================================
-   АДАПТИВНОСТЬ ПОД РАЗНЫЕ ЭКРАНЫ
+   АДАПТИВНОСТЬ: ЖЕСТКИЙ СТЭК ДЛЯ ТЕЛЕФОНОВ
    ========================================== */
 @media (max-width: 1200px) {
     .admin-grid {
-        grid-template-columns: 1fr; /* Аккуратно перестраиваем в одну колонку на небольших ноутбуках */
+        grid-template-columns: 1fr; /* Коробки админки выстраиваются идеальной стопкой */
         gap: 25px;
     }
 }
 
-@media (max-width: 968px) {
-    #app-container { padding: 15px 10px; }
-    .panel { padding: 20px 15px; }
-    .dashboard-layout { display: none !important; flex-direction: column; gap: 20px; }
-    .panel.dashboard-layout.active { display: flex !important; }
-    .admin-top-bar { flex-direction: column; gap: 15px; text-align: center; }
-    .table-wrapper { overflow-x: auto; }
-    table { min-width: 500px; }
-    th, td { padding: 10px 6px; font-size: 0.85rem; }
+@media (max-width: 768px) {
+    #app-container { 
+        padding: 15px 10px; 
+    }
+    
+    .panel { 
+        padding: 20px 15px; 
+    }
+
+    /* Пользовательский дашборд — стопкой */
+    .dashboard-layout { 
+        display: none !important; 
+        flex-direction: column; 
+        gap: 20px; 
+    }
+    .panel.dashboard-layout.active { 
+        display: flex !important; 
+    }
+
+    .admin-top-bar { 
+        flex-direction: column; 
+        gap: 15px; 
+        text-align: center; 
+    }
+
+    /* Адаптивное уменьшение больших шрифтов, чтобы не ломали коробки */
+    .bank-id-text {
+        font-size: 6.5vw !important; /* Уменьшается под ширину экрана мобильного */
+        margin-bottom: 15px;
+    }
+
+    .balance-text {
+        font-size: 8vw !important; /* Баланс больше не вылезает за пределы коробки */
+    }
+
+    .neon-title {
+        font-size: 1.1rem;
+    }
+
+    /* Защитный внутренний скролл для мобильной таблицы */
+    .table-wrapper { 
+        overflow-x: auto; 
+    }
+    table { 
+        min-width: 550px; 
+    }
+    th, td { 
+        padding: 10px 8px; 
+        font-size: 0.85rem; 
+    }
 }
