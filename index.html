@@ -151,7 +151,7 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script>
-        // ТВОЙ ОРИГИНАЛЬНЫЙ СКРИПТ КРУТЯЩЕЙСЯ ПЛАНЕТЫ
+        // Код крутящейся 3D планеты
         const canvas = document.getElementById('cyber-canvas');
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -159,7 +159,6 @@
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-        // Создание планеты (твоя оригинальная сетка)
         const geometry = new THREE.SphereGeometry(4, 30, 30);
         const material = new THREE.MeshBasicMaterial({
             color: 0x00ff66,
@@ -172,7 +171,6 @@
 
         camera.position.z = 8;
 
-        // Анимация вращения планеты
         function animate() {
             requestAnimationFrame(animate);
             planet.rotation.y += 0.002;
@@ -187,7 +185,7 @@
             renderer.setSize(window.innerWidth, window.innerHeight);
         });
 
-        // Функция переключения вкладок LOGIN / REGISTER
+        // Скрипт переключения Login / Register
         function switchAuthTab(tab) {
             const loginForm = document.getElementById('login-form');
             const registerForm = document.getElementById('register-form');
@@ -218,13 +216,11 @@
         function setTheme(theme) {
             document.body.className = '';
             if (theme !== 'green') document.body.classList.add('theme-' + theme);
-            // Динамически меняем цвет планете под тему
             if (theme === 'green') planet.material.color.setHex(0x00ff66);
             if (theme === 'cyan') planet.material.color.setHex(0x00f0ff);
             if (theme === 'pink') planet.material.color.setHex(0xff00ff);
         }
 
-        // Заглушки, чтобы не было ошибок
         function handleAuth(type) {
             document.getElementById('auth-panel').classList.remove('active');
             document.getElementById('dashboard-panel').classList.add('active');
