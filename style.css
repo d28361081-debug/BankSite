@@ -1,511 +1,239 @@
-/* ==========================================
-   TRUSTIX CORE MATRIX STYLESHEET // v4.82 (MOBILE OPTIMIZED)
-   ========================================= */
-
-:root {
-    --bg-dark: #020804;
-    --panel-bg: rgba(3, 14, 8, 0.75);
-    --neon-green: #00ff66;
-    --neon-cyan: #00f0ff;
-    --neon-red: #ff0055;
-    --text-gold: #ffb700;
-    --font-cyber: 'Orbitron', sans-serif;
-    --font-tech: 'Rajdhani', sans-serif;
-}
-
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    user-select: none;
-}
-
+/* ОБЩИЕ НАСТРОЙКИ СТИЛЯ (КИБЕРПАНК / ТЕРМИНАЛ) */
 body {
-    background-color: var(--bg-dark);
-    color: #e0f7e9;
-    font-family: var(--font-tech);
-    font-size: 16px;
-    overflow-x: hidden;
-    height: 100vh;
-    width: 100vw;
-}
-
-/* 3D Canvas Задник */
-#cyber-canvas {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 0;
-    pointer-events: none;
-}
-
-/* Прелоадер */
-.preloader {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: #010502;
-    z-index: 9999;
+    background-color: #050505;
+    color: #00ff66;
+    font-family: 'Courier New', Courier, monospace;
+    margin: 0;
+    padding: 20px;
     display: flex;
     justify-content: center;
     align-items: center;
-    transition: opacity 0.6s ease;
+    min-height: 100vh;
+    box-sizing: border-box;
 }
 
-.loader-content {
-    text-align: center;
+/* КРИТИЧЕСКИ ВАЖНЫЙ КЛАСС: Прячет экраны, которые не нужны в данный момент */
+.hidden {
+    display: none !important;
 }
 
-.loader-logo {
-    font-family: var(--font-cyber);
-    font-size: 3rem;
-    font-weight: 900;
-    color: var(--neon-green);
-    letter-spacing: 8px;
-    text-shadow: 0 0 20px rgba(0,255,102,0.6);
-    margin-bottom: 20px;
-}
-
-.loader-bar {
-    width: 240px;
-    height: 3px;
-    background: rgba(0,255,102,0.1);
-    margin: 0 auto 15px;
-    position: relative;
-    overflow: hidden;
-    border-radius: 2px;
-}
-
-.loader-bar .progress {
+/* КОНТЕЙНЕР ДЛЯ ВСЕХ ЭКРАНОВ */
+.terminal-container {
     width: 100%;
-    height: 100%;
-    background: var(--neon-green);
-    animation: loadShift 1.5s infinite linear;
+    max-width: 600px;
 }
 
-.loader-status {
-    font-family: var(--font-cyber);
-    font-size: 0.7rem;
-    color: rgba(0,255,102,0.5);
+/* СТИЛЬ КАРТОЧКИ / ЭКРАНА */
+.terminal-card {
+    background-color: #000000;
+    border: 2px solid #00ff66;
+    box-shadow: 0 0 15px rgba(0, 255, 102, 0.2);
+    padding: 25px;
+    border-radius: 5px;
+}
+
+/* ЗАГЛОВКИ И ТЕКСТЫ */
+h1, h2, h3 {
+    margin-top: 0;
+    text-align: center;
+    text-transform: uppercase;
     letter-spacing: 2px;
 }
 
-@keyframes loadShift {
-    0% { transform: translateX(-100%); }
-    100% { transform: translateX(100%); }
+h1 {
+    font-size: 24px;
+    color: #00ff66;
 }
 
-/* Стеклянные Кибер-Панели */
-.panel-glass {
-    background: var(--panel-bg);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(0, 255, 102, 0.15);
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5), inset 0 0 15px rgba(0,255,102,0.05);
-    border-radius: 4px;
-}
-
-/* СИСТЕМА ЭКРАНОВ */
-.screen {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 5;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.3s ease, transform 0.3s ease;
-    transform: scale(0.98);
-    display: none;
-}
-
-.screen.active {
-    opacity: 1;
-    pointer-events: auto;
-    transform: scale(1);
-    display: flex;
-    flex-direction: column;
-}
-
-/* Архитектура интерфейсов */
-#user-dashboard, #admin-dashboard {
-    padding: 20px;
-    height: 100vh;
-    overflow-y: auto;
-}
-
-/* Формы и авторизация */
-.auth-container {
-    width: 90%;
-    max-width: 400px;
-    padding: 30px 20px;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+.system-status {
     text-align: center;
+    font-size: 12px;
+    color: #888;
+    margin-bottom: 15px;
 }
 
-.bank-logo {
-    font-family: var(--font-cyber);
-    font-weight: 800;
-    color: #fff;
-    font-size: 2rem;
-    letter-spacing: 3px;
-    text-shadow: 0 0 10px rgba(0,255,102,0.4);
+.tech-id-label {
+    font-size: 12px;
+    color: #888;
+    margin: 10px 0;
 }
 
-.auth-subtitle {
-    font-size: 0.75rem;
-    color: var(--neon-green);
-    letter-spacing: 2px;
-    margin-bottom: 25px;
-}
-
-.auth-tabs {
-    display: flex;
-    margin-bottom: 25px;
-    border-bottom: 1px solid rgba(0,255,102,0.1);
-}
-
-.tab-btn {
-    flex: 1;
-    background: none;
+/* РАЗДЕЛИТЕЛЬНЫЕ ЛИНИИ */
+hr {
     border: none;
-    color: rgba(255,255,255,0.4);
-    font-family: var(--font-cyber);
-    font-size: 0.8rem;
-    padding: 10px;
-    cursor: pointer;
-    transition: all 0.2s;
+    border-top: 1px dashed #00ff66;
+    margin: 20px 0;
 }
 
-.tab-btn.active {
-    color: var(--neon-green);
-    border-bottom: 2px solid var(--neon-green);
+/* ФОРМЫ ВВОДА */
+.form-group {
+    margin-bottom: 15px;
 }
 
-.auth-form {
-    display: none;
-}
-
-.auth-form.active {
+.form-group label {
     display: block;
+    font-size: 12px;
+    margin-bottom: 5px;
+    font-weight: bold;
 }
 
-/* Поля ввода */
-.input-group {
-    position: relative;
-    margin-bottom: 20px;
-}
-
-.input-group input {
+input[type="text"],
+input[type="password"],
+input[type="number"] {
     width: 100%;
-    padding: 10px 10px 10px 0;
-    background: none;
-    border: none;
-    border-bottom: 1px solid rgba(255,255,255,0.15);
-    color: #fff;
-    font-family: var(--font-cyber);
-    font-size: 0.9rem;
+    background-color: #111;
+    border: 1px solid #00ff66;
+    color: #00ff66;
+    padding: 10px;
+    font-family: 'Courier New', Courier, monospace;
+    box-sizing: border-box;
+    border-radius: 3px;
+}
+
+input:focus {
     outline: none;
+    box-shadow: 0 0 8px rgba(0, 255, 102, 0.5);
 }
 
-.input-group label {
-    position: absolute;
-    top: 10px;
-    left: 0;
-    color: rgba(255,255,255,0.3);
-    font-size: 0.8rem;
-    transition: all 0.2s ease;
+/* КНОПКИ */
+.button-group {
+    display: flex;
+    gap: 10px;
 }
 
-.input-group input:focus ~ label,
-.input-group input:not(:placeholder-shown) ~ label {
-    top: -12px;
-    font-size: 0.65rem;
-    color: var(--neon-green);
-}
-
-.input-group input:focus {
-    border-bottom-color: var(--neon-green);
-}
-
-/* Кнопки */
-.btn {
-    width: 100%;
-    padding: 12px;
-    background: none;
-    border: 1px solid var(--neon-green);
-    color: var(--neon-green);
-    font-family: var(--font-cyber);
-    font-size: 0.85rem;
+button {
     cursor: pointer;
-    transition: all 0.2s;
+    font-family: 'Courier New', Courier, monospace;
+    font-weight: bold;
+    padding: 12px;
+    border: 2px solid #00ff66;
+    background-color: transparent;
+    color: #00ff66;
+    transition: all 0.2s ease;
+    text-transform: uppercase;
 }
 
-.btn:hover {
-    background: rgba(0,255,102,0.1);
+button:hover {
+    background-color: #00ff66;
+    color: #000;
+    box-shadow: 0 0 10px rgba(0, 255, 102, 0.5);
 }
 
-/* Хедеры рабочих экранов */
-.main-header {
+.btn-primary {
+    flex: 1;
+}
+
+.btn-secondary {
+    flex: 1;
+    border-color: #888;
+    color: #888;
+}
+
+.btn-secondary:hover {
+    background-color: #888;
+    color: #000;
+    box-shadow: 0 0 10px rgba(136, 136, 136, 0.5);
+}
+
+.card-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 12px 20px;
-    margin-bottom: 15px;
-    width: 100%;
-    flex-shrink: 0;
+    gap: 10px;
 }
 
-.header-logo {
-    font-family: var(--font-cyber);
-    font-weight: 800;
-    font-size: 0.9rem;
+.card-header h2 {
+    margin: 0;
+    font-size: 18px;
 }
 
-.header-status {
-    font-size: 0.75rem;
-    display: flex;
-    align-items: center;
-    gap: 6px;
+.btn-danger {
+    border-color: #ff5555;
+    color: #ff5555;
+    padding: 5px 15px;
+    font-size: 12px;
 }
 
-.pulse-dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-}
-.pulse-dot.green { background: var(--neon-green); box-shadow: 0 0 6px var(--neon-green); }
-.pulse-dot.gold { background: var(--text-gold); box-shadow: 0 0 6px var(--text-gold); }
-
-.btn-logout {
-    background: none;
-    border: 1px solid rgba(255,255,255,0.2);
-    color: rgba(255,255,255,0.6);
-    padding: 5px 10px;
-    font-family: var(--font-cyber);
-    font-size: 0.7rem;
-    cursor: pointer;
+.btn-danger:hover {
+    background-color: #ff5555;
+    color: #000;
+    box-shadow: 0 0 10px rgba(255, 85, 85, 0.5);
 }
 
-/* УМНАЯ СЕТКА ДАШБОРДА */
-.dashboard-grid {
-    display: grid;
-    gap: 15px;
-    width: 100%;
+/* БАЛАНС */
+.balance-section {
+    text-align: center;
 }
 
-.grid-user {
-    grid-template-columns: 1fr 1.2fr;
-}
-
-.card-profile {
-    padding: 20px;
-}
-
-.profile-header {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-}
-
-.avatar-neon {
-    width: 40px;
-    height: 40px;
-    border: 2px solid var(--neon-green);
-    background: rgba(0,255,102,0.05);
-}
-
-.glow-text {
-    font-family: var(--font-cyber);
-    font-size: 1.2rem;
-    color: #fff;
-}
-
-.tech-id {
-    font-size: 0.75rem;
-    color: rgba(0,255,102,0.6);
+.balance-section h3 {
+    font-size: 14px;
+    color: #888;
 }
 
 .balance-display {
-    margin-top: 15px;
+    font-size: 32px;
+    font-weight: bold;
+    margin-top: 5px;
 }
 
-.balance-display .label {
-    font-size: 0.7rem;
-    color: rgba(255,255,255,0.4);
-}
-
-.balance-amount {
-    font-family: var(--font-cyber);
-    font-size: 2rem;
-    color: var(--neon-green);
-}
-.balance-amount span { font-size: 1.2rem; }
-
-.card-transfer {
-    padding: 20px;
-}
-
-.card-history {
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    max-height: 70vh;
-}
-
-.section-title {
-    font-family: var(--font-cyber);
-    font-size: 0.85rem;
-    margin-bottom: 15px;
-    border-left: 3px solid var(--neon-green);
-    padding-left: 8px;
-}
-
-.transaction-log {
+/* ИСТОРИЯ ОПЕРАЦИЙ */
+.history-log {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    max-height: 150px;
     overflow-y: auto;
 }
 
-.tx-item {
+.history-item {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    padding: 10px 5px;
-    border-bottom: 1px solid rgba(255,255,255,0.05);
-    font-size: 0.85rem;
+    padding: 8px 5px;
+    border-bottom: 1px solid #222;
+    font-size: 13px;
 }
 
-.tx-meta { font-size: 0.65rem; color: rgba(255,255,255,0.3); }
-.tx-in { border-left: 2px solid var(--neon-green); padding-left: 5px; }
-.tx-in .tx-amount { color: var(--neon-green); }
-.tx-out { border-left: 2px solid var(--neon-red); padding-left: 5px; }
-.tx-out .tx-amount { color: var(--neon-red); }
-
-/* АДМИНКА */
-.grid-admin {
-    grid-template-columns: 1fr 1.3fr;
+/* АДМИН-ПАНЕЛЬ */
+.admin-users-scroll {
+    max-height: 300px;
+    overflow-y: auto;
+    padding-right: 5px;
 }
-.admin-border { border-color: rgba(255, 183, 0, 0.25) !important; }
-.gold-glow { color: var(--text-gold) !important; }
-.text-gold { color: var(--text-gold) !important; }
-.admin-avatar { border-color: var(--text-gold); }
 
-.admin-actions-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
+.admin-user-card {
+    background-color: #111;
+    padding: 15px;
+    margin-bottom: 15px;
+    border: 1px solid #333;
+    border-radius: 4px;
 }
-.btn-gold { border-color: var(--text-gold); color: var(--text-gold); }
-.btn-red { border-color: var(--neon-red); color: var(--neon-red); }
-.btn-delete { grid-column: span 2; background: rgba(255,0,85,0.1); border-color: var(--neon-red); color: #fff; }
 
-.full-width-admin { grid-column: 1 / span 2; }
-.table-wrapper { overflow-y: auto; max-height: 40vh; }
-.admin-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
-.admin-table th, .admin-table td { padding: 10px 5px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-
-/* ТОСТЫ И БАН СТИЛИ */
-.notification-container {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    z-index: 10000;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
+.admin-user-card p {
+    margin: 5px 0;
+    font-size: 13px;
 }
-.toast {
-    background: rgba(2, 12, 5, 0.95);
-    border: 1px solid var(--neon-green);
-    color: var(--neon-green);
-    padding: 10px 20px;
-    font-family: var(--font-cyber);
-    font-size: 0.75rem;
+
+.admin-user-card input[type="number"] {
+    width: 100px;
+    display: inline-block;
+    padding: 5px;
+    margin-right: 5px;
 }
-.toast.error { border-color: var(--neon-red); color: var(--neon-red); }
 
-.ban-overlay {
-    position: fixed;
-    top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(1, 3, 2, 0.95);
-    z-index: 20000;
-    display: none;
-    justify-content: center;
-    align-items: center;
+.admin-action-btn {
+    padding: 5px 10px;
+    font-size: 11px;
+    margin-right: 5px;
+    margin-top: 5px;
 }
-.ban-card {
-    background: #0d0205;
-    border: 1px solid var(--neon-red);
-    padding: 30px;
-    width: 90%;
-    max-width: 400px;
-    text-align: center;
+
+/* ЭФФЕКТ МИГАНИЯ ТЕКСТА */
+.blink-text {
+    animation: blink-animation 2s infinite;
 }
-.ban-card h1 { font-family: var(--font-cyber); color: var(--neon-red); font-size: 1.5rem; }
-.neon-line-red { height: 2px; background: var(--neon-red); margin: 15px 0; }
-.tech-code { font-size: 0.75rem; font-family: var(--font-cyber); color: rgba(255,255,255,0.3); margin-bottom: 20px;}
 
-/* Кастомный скролл */
-.custom-scroll::-webkit-scrollbar { width: 3px; }
-.custom-scroll::-webkit-scrollbar-thumb { background: rgba(0,255,102,0.3); }
-
-/* АДАПТИВНОСТЬ ПОД МОБИЛКИ */
-@media (max-width: 768px) {
-    body {
-        overflow-y: auto;
-    }
-
-    #user-dashboard, #admin-dashboard {
-        height: auto;
-        min-height: 100vh;
-        padding: 10px;
-        overflow-y: visible;
-    }
-
-    .grid-user, .grid-admin {
-        grid-template-columns: 1fr !important;
-    }
-
-    .card-history {
-        grid-column: 1 !important;
-        grid-row: auto !important;
-        max-height: none;
-    }
-
-    .full-width-admin {
-        grid-column: 1 !important;
-    }
-
-    .table-wrapper {
-        max-height: none;
-        overflow-x: auto;
-    }
-
-    .main-header {
-        flex-direction: row;
-        padding: 10px;
-        font-size: 0.8rem;
-    }
-
-    .balance-amount {
-        font-size: 1.8rem;
-    }
-    
-    .notification-container {
-        left: 10px;
-        right: 10px;
-        bottom: 10px;
-    }
-    
-    .toast {
-        width: 100%;
-        text-align: center;
-    }
+@keyframes blink-animation {
+    0% { opacity: 1; }
+    50% { opacity: 0.4; }
+    100% { opacity: 1; }
 }
