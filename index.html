@@ -13,6 +13,18 @@
 </head>
 <body>
 
+    <div id="loader-overlay">
+        <div class="loader-content">
+            <h1 class="loader-title">TRUSTIX CORE</h1>
+            <div class="loader-bar">
+                <div class="loader-progress"></div>
+            </div>
+            <p class="loader-status">CONNECTING TO MAINFRAME...</p>
+        </div>
+    </div>
+
+    <div id="notification-container"></div>
+
     <canvas id="cyber-canvas"></canvas>
     <div class="cursor-glow" id="cursor-glow"></div>
 
@@ -80,15 +92,15 @@
                         <div class="avatar-neon" id="user-avatar"></div>
                         <div>
                             <h3 id="user-display-name">FFFFFF</h3>
-                            <span class="badge">SECURE TERMINAL OPERATIONAL</span>
+                            <span class="badge" id="user-badge">SECURE TERMINAL OPERATIONAL</span>
                         </div>
                     </div>
                     <div class="card-body">
                         <p class="label">CORE BANK ID</p>
-                        <p class="bank-id-text" id="user-bank-id">57843292</p>
+                        <p class="bank-id-text dynamic-color" id="user-bank-id">57843292</p>
                         <p class="label">TRUSTIX CREDITS LIQUIDITY</p>
                         <div class="balance-box">
-                            <p class="balance-text" id="user-balance">0.00 LMT</p>
+                            <p class="balance-text theme-neon-text" id="user-balance">0.00 LMT</p>
                         </div>
                     </div>
                 </div>
