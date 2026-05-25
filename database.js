@@ -1,140 +1,189 @@
-const SUPABASE_URL = "https://aunfrnyhbfcxgdfhvcox.supabase.co"; 
-const SUPABASE_KEY = "sb_publishable_8Xf1-4RnW0-f09idcW76vQ_JU5_Iqqe";
+(function () {
+    // ВШИТЫЕ КЛЮЧИ ДОСТУПА К SUPABASE CLOUD (ОБЛАКО ДЛЯ СЕТЕВОЙ РАБОТЫ)
+    const SUPABASE_URL = "https://wunclvpywstisbfeclwz.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind1bmNsdnB5d3N0aXNiZmVjbHd6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTU0OTY4MTIsImV4cCI6MjAzMTA3MjgxMn0.0fTmsVpY8GZlyS1fF_i86bUaA28L9PzB9zJkX5i_qZk";
 
-const ADMIN_USERNAME = "admin21";
-const ADMIN_PASSWORD_CRYPT = "admin210412";
-
-async function supabaseFetch(endpoint, options = {}) {
-    const headers = {
-        "apikey": SUPABASE_KEY,
-        "Authorization": `Bearer ${SUPABASE_KEY}`,
-        "Content-Type": "application/json",
-        "Prefer": "return=representation"
-    };
-    
-    // ДОБАВЛЯЕМ ОБЯЗАТЕЛЬНЫЕ НАСТРОЙКИ БЕЗОПАСНОСТИ ДЛЯ БРАУЗЕРОВ
-    const response = await fetch(`${SUPABASE_URL}/rest/v1/${endpoint}`, {
-        ...options,
-        mode: 'cors', // Разрешает запросы между разными сайтами (Render -> Supabase)
-        headers: { ...headers, ...options.headers }
-    });
-    
-    if (!response.ok) {
-        const errData = await response.json();
-        throw new Error(errData.message || "Ошибка базы данных");
-    }
-    return response.json();
-}
-
-window.CyberDB = {
-    async loginUser(username, password) {
-        if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD_CRYPT) {
-            return { username: ADMIN_USERNAME, role: 'admin', isAdmin: true };
-        }
-        const users = await supabaseFetch(`users?username=eq.${encodeURIComponent(username)}&select=*`);
-        if (users.length === 0) throw new Error("Пользователь не найден");
-        const user = users[0];
-        if (user.is_banned) throw new Error(`TERMINAL_BANNED // CODE: ${user.ban_code}`);
-        if (user.password !== password) throw new Error("Неверный пароль");
-        return { ...user, role: 'user', isAdmin: false };
-    },
-
-    async registerUser(username, password) {
-        if (username.toLowerCase() === ADMIN_USERNAME) throw new Error("Имя зарезервировано");
-        if (username.length < 3) throw new Error("Имя слишком короткое");
-        const existing = await supabaseFetch(`users?username=eq.${encodeURIComponent(username)}&select=id`);
-        if (existing.length > 0) throw new Error("Этот логин уже занят");
-
-        const techId = "TRX-" + Math.floor(100000 + Math.random() * 900000);
-        const newUser = {
-            username: username,
-            password: password,
-            tech_id: techId,
-            balance: 1000,
-            is_banned: false,
-            ban_code: ""
+    // Сервисная функция отправки POST/GET команд
+    async function supabaseFetch(endpoint, options = {}) {
+        const url = `${SUPABASE_URL}/rest/v1/${endpoint}`;
+        const headers = {
+            "apikey": SUPABASE_ANON_KEY,
+            "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+            "Content-Type": "application/json",
+            "Prefer": options.prefer || "return=representation"
         };
-        const created = await supabaseFetch("users", {
-            method: "POST",
-            body: JSON.stringify(newUser)
-        });
-        return created[0];
-    },
-
-    async getUserData(username) {
-        const users = await supabaseFetch(`users?username=eq.${encodeURIComponent(username)}&select=*`);
-        if (users.length === 0) return null;
-        return users[0];
-    },
-
-    async transferFunds(senderUsername, receiverUsername, amount) {
-        amount = parseFloat(amount);
-        if (isNaN(amount) || amount <= 0) throw new Error("Неверная сумма");
-        if (senderUsername === receiverUsername) throw new Error("Нельзя перевести себе");
-
-        const senderData = await this.getUserData(senderUsername);
-        if (!senderData || senderData.balance < amount) throw new Error("Недостаточно средств");
-
-        const receiverData = await this.getUserData(receiverUsername);
-        if (!receiverData) throw new Error("Получатель не найден");
-
-        await supabaseFetch(`users?username=eq.${encodeURIComponent(senderUsername)}`, {
-            method: "PATCH",
-            body: JSON.stringify({ balance: senderData.balance - amount })
-        });
-        await supabaseFetch(`users?username=eq.${encodeURIComponent(receiverUsername)}`, {
-            method: "PATCH",
-            body: JSON.stringify({ balance: receiverData.balance + amount })
-        });
-
-        await supabaseFetch("transactions", {
-            method: "POST",
-            body: JSON.stringify({
-                sender: senderUsername,
-                receiver: receiverUsername,
-                amount: amount,
-                timestamp: new Date().toLocaleTimeString()
-            })
-        });
-        return true;
-    },
-
-    async getTransactionHistory(username) {
-        return await supabaseFetch(`transactions?or=(sender.eq.${encodeURIComponent(username)},receiver.eq.${encodeURIComponent(username)})&order=id.desc&limit=20`);
-    },
-
-    async getAllUsers() {
-        return await supabaseFetch("users?order=username.asc");
-    },
-
-    async updateBalance(username, newBalance) {
-        await supabaseFetch(`users?username=eq.${encodeURIComponent(username)}`, {
-            method: "PATCH",
-            body: JSON.stringify({ balance: parseFloat(newBalance) })
-        });
-        return true;
-    },
-
-    async banUser(username, banCode) {
-        await supabaseFetch(`users?username=eq.${encodeURIComponent(username)}`, {
-            method: "PATCH",
-            body: JSON.stringify({ is_banned: true, ban_code: banCode })
-        });
-        return true;
-    },
-
-    async unbanUser(username) {
-        await supabaseFetch(`users?username=eq.${encodeURIComponent(username)}`, {
-            method: "PATCH",
-            body: JSON.stringify({ is_banned: false, ban_code: "" })
-        });
-        return true;
-    },
-
-    async deleteUser(username) {
-        await supabaseFetch(`users?username=eq.${encodeURIComponent(username)}`, {
-            method: "DELETE"
-        });
-        return true;
+        
+        const response = await fetch(url, { ...options, headers });
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`Supabase Error: ${errorText}`);
+        }
+        return await response.json();
     }
-};
+
+    const CyberDB = {
+        // РЕГИСТРАЦИЯ
+        async registerUser(username, password) {
+            const cleanUser = username.trim();
+            if(cleanUser.toLowerCase() === 'admin21') {
+                throw new Error("Идентификатор зарезервирован системой безопасности.");
+            }
+
+            // Проверяем, есть ли такой ник в глобальной базе данных
+            const existing = await supabaseFetch(`users?username=eq.${encodeURIComponent(cleanUser)}`, { method: "GET" });
+            if (existing && existing.length > 0) {
+                throw new Error("ОШИБКА: Данный логин уже занят другим оператором!");
+            }
+
+            // Генерируем уникальный 8-значный Bank ID
+            let techId = "";
+            let unique = false;
+            while(!unique) {
+                techId = Math.floor(10000000 + Math.random() * 90000000).toString();
+                const checkId = await supabaseFetch(`users?tech_id=eq.${techId}`, { method: "GET" });
+                if(checkId.length === 0) unique = true;
+            }
+
+            // Запись в облако
+            const payload = {
+                username: cleanUser,
+                password: password,
+                tech_id: techId,
+                balance: 0.00,
+                is_banned: false,
+                ban_code: ""
+            };
+
+            return await supabaseFetch("users", {
+                method: "POST",
+                body: JSON.stringify(payload)
+            });
+        },
+
+        // ВХОД В СИСТЕМУ
+        async loginUser(username, password) {
+            const cleanUser = username.trim();
+            
+            // Проверка на жестко зашитого админа
+            if (cleanUser === "admin21" && password === "admin210412") {
+                return { username: "admin21", isAdmin: true };
+            }
+
+            const data = await supabaseFetch(`users?username=eq.${encodeURIComponent(cleanUser)}&password=eq.${encodeURIComponent(password)}`, { method: "GET" });
+            if (!data || data.length === 0) {
+                throw new Error("КВАНТОВАЯ ОШИБКА: Неверный логин или крипто-пароль!");
+            }
+
+            const user = data[0];
+            if (user.is_banned) {
+                throw new Error(`ВХОД ЗАПРЕЩЕН: Ваша консоль заблокирована.\nКод блокировки: ${user.ban_code}`);
+            }
+
+            return { username: user.username, isAdmin: false };
+        },
+
+        // ПОЛУЧЕНИЕ ДАННЫХ ЮЗЕРА
+        async getUserData(username) {
+            const data = await supabaseFetch(`users?username=eq.${encodeURIComponent(username)}`, { method: "GET" });
+            return data.length > 0 ? data[0] : null;
+        },
+
+        // ИСТОРИЯ ТРАНЗАКЦИЙ СЕТИ
+        async getTransactionHistory(username) {
+            const encUser = encodeURIComponent(username);
+            return await supabaseFetch(`transactions?or=(sender.eq.${encUser},receiver.eq.${encUser})&order=created_at.desc`, { method: "GET" });
+        },
+
+        // КВАНТОВЫЙ МЕЖБАНКОВСКИЙ ПЕРЕВОД
+        async transferFunds(senderUsername, targetTechId, amount) {
+            if (amount <= 0) throw new Error("Сумма операции должна быть положительной.");
+
+            // Ищем отправителя в сети
+            const senderData = await this.getUserData(senderUsername);
+            if (!senderData) throw new Error("Отправитель не обнаружен в ядре.");
+            if (senderData.balance < amount) throw new Error("НЕДОСТАТОЧНО СРЕДСТВ ДЛЯ ПРОВЕДЕНИЯ ТРАНЗАКЦИИ.");
+
+            // Ищем получателя по его Bank ID (8 знаков)
+            const receiverArray = await supabaseFetch(`users?tech_id=eq.${targetTechId.trim()}`, { method: "GET" });
+            if (!receiverArray || receiverArray.length === 0) {
+                throw new Error("АДРЕСАТ НЕ НАЙДЕН: Проверьте корректность Bank ID!");
+            }
+            const receiverData = receiverArray[0];
+
+            if (senderData.username === receiverData.username) {
+                throw new Error("Запрещено переводить средства самому себе.");
+            }
+
+            // Проводим списание и зачисление
+            const newSenderBalance = parseFloat(senderData.balance) - amount;
+            const newReceiverBalance = parseFloat(receiverData.balance) + amount;
+
+            await supabaseFetch(`users?id=eq.${senderData.id}`, {
+                method: "PATCH",
+                body: JSON.stringify({ balance: newSenderBalance })
+            });
+
+            await supabaseFetch(`users?id=eq.${receiverData.id}`, {
+                method: "PATCH",
+                body: JSON.stringify({ balance: newReceiverBalance })
+            });
+
+            // Логируем перевод в глобальный архив
+            const txPayload = {
+                sender: senderData.username,
+                receiver: receiverData.username,
+                amount: amount
+            };
+            await supabaseFetch("transactions", { method: "POST", body: JSON.stringify(txPayload) });
+        },
+
+        // АДМИНКА: ВСЕ ЮЗЕРЫ
+        async getAllUsers() {
+            return await supabaseFetch("users?order=username.asc", { method: "GET" });
+        },
+
+        // АДМИНКА: ИЗМЕНЕНИЕ БАЛАНСА
+        async updateBalance(username, amount, isGive) {
+            const userData = await this.getUserData(username);
+            if (!userData) return;
+
+            let currentBal = parseFloat(userData.balance);
+            let newBal = isGive ? (currentBal + amount) : (currentBal - amount);
+            if (newBal < 0) newBal = 0;
+
+            await supabaseFetch(`users?id=eq.${userData.id}`, {
+                method: "PATCH",
+                body: JSON.stringify({ balance: newBal })
+            });
+        },
+
+        // АДМИНКА: ЗАБАНИТЬ
+        async banUser(username, code) {
+            const userData = await this.getUserData(username);
+            if (!userData) return;
+            await supabaseFetch(`users?id=eq.${userData.id}`, {
+                method: "PATCH",
+                body: JSON.stringify({ is_banned: true, ban_code: code })
+            });
+        },
+
+        // АДМИНКА: РАЗБАНИТЬ
+        async unbanUser(username) {
+            const userData = await this.getUserData(username);
+            if (!userData) return;
+            await supabaseFetch(`users?id=eq.${userData.id}`, {
+                method: "PATCH",
+                body: JSON.stringify({ is_banned: false, ban_code: "" })
+            });
+        },
+
+        // АДМИНКА: УДАЛИТЬ С СЕРВЕРА
+        async deleteUser(username) {
+            const userData = await this.getUserData(username);
+            if (!userData) return;
+            await supabaseFetch(`users?id=eq.${userData.id}`, { method: "DELETE" });
+        }
+    };
+
+    window.CyberDB = CyberDB;
+})();
