@@ -17,7 +17,6 @@ function init3DEngine() {
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-    // Геометрия Земли
     const earthGeo = new THREE.SphereGeometry(3, 64, 64);
     const earthMat = new THREE.MeshPhongMaterial({
         color: 0x0a1128,
@@ -28,7 +27,6 @@ function init3DEngine() {
     const earth = new THREE.Mesh(earthGeo, earthMat);
     scene.add(earth);
 
-    // Добавление матрицы светящихся частиц вокруг
     const particlesGeo = new THREE.BufferGeometry();
     const count = 700;
     const positions = new Float32Array(count * 3);
@@ -47,7 +45,6 @@ function init3DEngine() {
     const particleSystem = new THREE.Points(particlesGeo, particlesMat);
     scene.add(particleSystem);
 
-    // Освещение сцены
     const dirLight = new THREE.DirectionalLight(0x00ff66, 1.5);
     dirLight.position.set(5, 3, 5);
     scene.add(dirLight);
@@ -105,7 +102,6 @@ function switchAuthTab(tab) {
     }
 }
 
-// Надежное переключение видимости панелей через принудительный сброс классов
 function showActivePanel(panelId) {
     const allPanels = document.querySelectorAll('.panel');
     allPanels.forEach(panel => {
@@ -119,7 +115,7 @@ function showActivePanel(panelId) {
 }
 
 // ==========================================
-// CORE AUTHENTICATION LOGIC (SUPABASE + FALLBACK)
+// CORE AUTHENTICATION LOGIC
 // ==========================================
 async function handleRegister(e) {
     e.preventDefault();
@@ -140,7 +136,7 @@ async function handleRegister(e) {
         alert(`ACCESS GRANTED. Your Core Bank ID is: ${generatedBankId}`);
         switchAuthTab('login');
     } catch (err) {
-        console.warn("Supabase Error or not configed. Using local simulator mode.");
+        console.warn("Supabase simulator active.");
         alert(`[SIMULATOR MODE] Account created! ID: ${generatedBankId}`);
         switchAuthTab('login');
     }
@@ -151,7 +147,6 @@ async function handleLogin(e) {
     const user = document.getElementById('login-username').value.trim();
     const pass = document.getElementById('login-password').value;
 
-    // Режим разработчика (Вход без базы данных для тестов)
     if (user === 'admin21' && pass === 'admin210412') {
         currentUser = { username: 'admin21', bank_id: '99999999', balance: 999999999, is_admin: true, is_banned: false };
         initAdminDashboard();
@@ -179,8 +174,9 @@ async function handleLogin(e) {
             initUserDashboard();
         }
     } catch (err) {
-        console.warn("Supabase auth failed. Simulating standard user login.");
-        currentUser = { username: user, bank_id: '58294173', balance: 57400.00, is_admin: false, is_banned: false };
+        console.warn("Supabase simulation active.");
+        // ТЕПЕРЬ ТУТ ИЗНАЧАЛЬНО СТОИТ БАЛАНС 0.00 ДЛЯ ТЕСТОВЫХ ЮЗЕРОВ
+        currentUser = { username: user, bank_id: '58294173', balance: 0.00, is_admin: false, is_banned: false };
         initUserDashboard();
     }
 }
@@ -216,9 +212,8 @@ async function loadTransactionHistory() {
             renderTxItem(container, isIncoming, tx.sender_id, tx.receiver_id, tx.amount);
         });
     } catch (e) {
-        // Демо-данные, если база данных пуста или отключена
-        renderTxItem(container, true, '88214512', currentUser.bank_id, 2500);
-        renderTxItem(container, false, currentUser.bank_id, '14259841', 420);
+        // Если баланс 0 и транзакций нет, просто оставляем панель чистой
+        container.innerHTML = '<p style="color:#64748b; text-align:center; margin-top:20px;">NO TRANSACTIONS DETECTED</p>';
     }
 }
 
@@ -265,9 +260,7 @@ async function handleTransfer(e) {
         alert("CREDIT TRANSFER EXECUTED SUCCESSFULLY.");
         initUserDashboard();
     } catch (err) {
-        currentUser.balance -= amount;
-        alert(`[SIMULATOR] Transfer of ${amount} ฿ sent to node ${destId}.`);
-        initUserDashboard();
+        alert("TRANSACTION ERROR: Insufficient or unstable neural connection.");
     }
 }
 
@@ -289,9 +282,7 @@ async function initAdminDashboard() {
             renderAdminUserRow(tbody, u);
         });
     } catch (e) {
-        // Демо-строки в админке для визуализации верстки
-        renderAdminUserRow(tbody, { username: 'Cyber_Spectre', bank_id: '48291045', balance: 14500.85, is_banned: false });
-        renderAdminUserRow(tbody, { username: 'Net_Runner_01', bank_id: '12749502', balance: 0.00, is_banned: true });
+        renderAdminUserRow(tbody, { username: 'Demo_User', bank_id: '58294173', balance: 0.00, is_banned: false });
     }
 }
 
@@ -327,7 +318,7 @@ async function executeAdminAction(action) {
             await _supabase.from('users').update({ is_banned: false }).eq('bank_id', targetId);
         }
     } catch (err) {
-        console.log("Admin action simulation executed.");
+        console.log("Admin action simulator executed.");
     }
 
     alert(`ADMIN ACTION [${action.toUpperCase()}] ENGAGED ON NODE ${targetId}`);
@@ -342,5 +333,5 @@ function logout() {
 window.onload = () => {
     init3DEngine();
     setupUIEffects();
-    showActivePanel('auth-panel'); // Первоначальный запуск строго на окне входа
+    showActivePanel('auth-panel');
 };
