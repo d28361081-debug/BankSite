@@ -45,7 +45,7 @@ body {
     position: relative;
 }
 
-/* ФОН ПЛАНЕТЫ СТАБИЛЬНО НА ЗАДНЕМ ПЛАНЕ */
+/* Фон с планетой */
 #cyber-canvas {
     position: fixed;
     top: 0;
@@ -56,7 +56,7 @@ body {
     pointer-events: none;
 }
 
-/* ЖЕСТКОЕ РАЗДЕЛЕНИЕ ФОРМ ЛОГИНА И РЕГИСТРАЦИИ */
+/* Разделение вкладок авторизации */
 .auth-form-block {
     display: none !important;
 }
@@ -64,11 +64,11 @@ body {
     display: block !important;
 }
 
-/* ФИКС ДЛЯ КНОПОК ПОЛЬЗОВАТЕЛЯ И АДМИНА (РАЗДЕЛЕНИЕ) */
+/* Отступы для слипшихся кнопок */
 .buttons-fix-container {
     display: flex !important;
     flex-direction: column !important;
-    gap: 16px !important; /* Устанавливает точный зазор между кнопками */
+    gap: 16px !important;
     width: 100% !important;
 }
 
@@ -103,7 +103,7 @@ body {
     color: #fff !important; 
 }
 
-/* НЕОНОВО-КРАСНАЯ КНОПКА DELETE В ТАБЛИЦЕ */
+/* Красный Delete в таблице */
 button.terminate-btn, .terminate-btn, td button {
     display: inline-block !important;
     width: auto !important;
@@ -128,7 +128,7 @@ button.terminate-btn:hover, .terminate-btn:hover, td button:hover {
     text-shadow: none !important;
 }
 
-/* ИНТЕРФЕЙС И ТАБЛИЦЫ */
+/* Остальные базовые стили интерфейса */
 #preloader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #020208; z-index: 99999; display: flex; justify-content: center; align-items: center; }
 .preloader-content { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; text-align: center; }
 .logo-text { font-family: 'Orbitron', sans-serif; font-size: 3rem; font-weight: 900; letter-spacing: 4px; color: #fff; text-shadow: 0 0 20px var(--neon-accent); }
