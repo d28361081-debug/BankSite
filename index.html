@@ -3,235 +3,173 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TRUSTIX CONTROL CENTER</title>
+    <title>TRUSTIX BANK // Cyberpunk Financial System</title>
+    
+    <meta name="description" content="Futuristic Premium Cyberpunk Banking Ecosystem.">
+    <meta property="og:title" content="TRUSTIX BANK // Next-Gen RP Finance">
+    <meta property="og:description" content="AAA-Gaming Interface Asset for Digital Banking Control.">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
     <canvas id="cyber-canvas"></canvas>
 
-    <div id="cyber-notification-zone"></div>
+    <div class="cursor-glow" id="cursor-glow"></div>
 
-    <div class="theme-selector">
-        <div class="theme-dot dot-green" onclick="setTheme('green')"></div>
-        <div class="theme-dot dot-cyan" onclick="setTheme('cyan')"></div>
-        <div class="theme-dot dot-pink" onclick="setTheme('pink')"></div>
-    </div>
-
-    <div id="preloader">
-        <div class="preloader-content">
-            <h1 class="logo-text">TRUSTIX_BANK</h1>
-            <div class="neon-bar">
-                <div class="progress"></div>
-            </div>
+    <div class="preloader" id="preloader">
+        <div class="loader-content">
+            <h1 class="logo-text glitch" data-text="TRUSTIX">TRUSTIX</h1>
+            <div class="neon-bar"><div class="progress"></div></div>
+            <p class="status-text">INITIALIZING QUANTUM ENCRYPTION...</p>
         </div>
     </div>
 
-    <div id="app-container">
-
-        <div id="auth-panel" class="panel active">
-            <div class="glass card">
-                <h2 class="logo-text" style="font-size: 2rem; margin-bottom: 30px; text-align: center;">TRUSTIX</h2>
-                
-                <div class="auth-tabs">
-                    <button class="tab-btn active" onclick="switchAuthTab('login')">LOGIN</button>
-                    <button class="tab-btn" onclick="switchAuthTab('register')">REGISTER</button>
-                </div>
-
-                <div id="login-form" class="auth-form-block active">
-                    <div class="input-group">
-                        <label>USER ID / WALLET</label>
-                        <input type="text" id="login-username" placeholder="ENTER ID...">
-                    </div>
-                    <div class="input-group">
-                        <label>ACCESS KEY</label>
-                        <input type="password" id="login-password" placeholder="••••••••">
-                    </div>
-                    <button class="cyber-btn" onclick="handleAuth('login')">ACCESS SYSTEM</button>
-                </div>
-
-                <div id="register-form" class="auth-form-block">
-                    <div class="input-group">
-                        <label>CREATE USER ID</label>
-                        <input type="text" id="register-username" placeholder="NEW ID...">
-                    </div>
-                    <div class="input-group">
-                        <label>GENERATE PASSWORD</label>
-                        <input type="password" id="register-password" placeholder="••••••••">
-                    </div>
-                    <button class="cyber-btn" onclick="handleAuth('register')">CREATE ACCOUNT</button>
-                </div>
+    <main id="app-container">
+        
+        <section class="panel glass auth-panel active" id="auth-panel">
+            <h2 class="neon-title-green">CORE // AUTHORIZATION</h2>
+            <div class="auth-tabs">
+                <button class="tab-btn active" onclick="switchAuthTab('login')">LOGIN</button>
+                <button class="tab-btn" onclick="switchAuthTab('register')">REGISTER</button>
             </div>
-        </div>
 
-        <div id="dashboard-panel" class="panel">
-            <div class="dashboard-grid">
-                <div class="glass card">
-                    <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 25px;">
-                        <div style="width: 45px; height: 45px; background: var(--neon-accent); border-radius: 50%; box-shadow: 0 0 15px var(--neon-glow);"></div>
+            <form id="login-form" class="auth-form active" onsubmit="handleLogin(event)">
+                <div class="input-group">
+                    <label>NET_ID / USERNAME</label>
+                    <input type="text" id="login-username" required placeholder="Enter terminal ID...">
+                </div>
+                <div class="input-group">
+                    <label>ACCESS_KEY / PASSWORD</label>
+                    <input type="password" id="login-password" required placeholder="••••••••">
+                </div>
+                <button type="submit" class="cyber-btn green-glow">INITIALIZE LINK</button>
+            </form>
+
+            <form id="register-form" class="auth-form" onsubmit="handleRegister(event)">
+                <div class="input-group">
+                    <label>CREATE USERNAME</label>
+                    <input type="text" id="reg-username" required placeholder="Alpha_01">
+                </div>
+                <div class="input-group">
+                    <label>SECURE PASSWORD</label>
+                    <input type="password" id="reg-password" required placeholder="••••••••">
+                </div>
+                <div class="input-group">
+                    <label>CONFIRM PASSWORD</label>
+                    <input type="password" id="reg-repeat" required placeholder="••••••••">
+                </div>
+                <button type="submit" class="cyber-btn green-glow">CREATE ACCOUNT</button>
+            </form>
+        </section>
+
+        <section class="panel dashboard-layout" id="user-dashboard">
+            <div class="dash-column">
+                <div class="glass card profile-card border-pulse">
+                    <div class="card-header">
+                        <div class="avatar-neon"></div>
                         <div>
-                            <h3 style="font-family: 'Orbitron';">USER NODE</h3>
-                            <span style="color: var(--neon-green); font-size: 0.8rem;">ONLINE</span>
+                            <h3 id="user-display-name">SYSTEM_USER</h3>
+                            <span class="badge">SECURE_NODE</span>
                         </div>
                     </div>
-
-                    <div class="balance-box">
-                        <div class="meta-label" style="text-align: center;">SECURE BALANCE</div>
-                        <div class="balance-text"><span id="user-balance">0.00</span> CC</div>
-                    </div>
-
-                    <div class="input-group">
-                        <label>TARGET NODE</label>
-                        <input type="text" id="tx-recipient" placeholder="ADDRESS...">
-                    </div>
-                    <div class="input-group">
-                        <label>AMOUNT</label>
-                        <input type="number" id="tx-amount" placeholder="0.00">
-                    </div>
-
-                    <div class="buttons-fix-container">
-                        <button class="cyber-btn" onclick="executeTransaction()">EXECUTE TRANSACTION</button>
-                        <button class="cyber-btn red-glow" onclick="logout()">DISCONNECT NODE</button>
+                    <hr class="neon-divider">
+                    <div class="card-body">
+                        <p class="label">BANK ACCOUNT ID</p>
+                        <p class="bank-id-text" id="user-bank-id">00000000</p>
+                        <p class="label">NET CREDIT BALANCE</p>
+                        <p class="balance-text green-neon" id="user-balance">0.00 LMT</p>
                     </div>
                 </div>
 
-                <div class="glass card">
-                    <h3 class="meta-label" style="margin-bottom: 20px; font-family: 'Orbitron';">TRANSACTION LEDGER</h3>
-                    <div class="ledger-container" id="ledger-items"></div>
+                <div class="glass card action-card">
+                    <h3 class="neon-title-green">⚡ CREDIT TRANSFER</h3>
+                    <form onsubmit="handleTransfer(event)">
+                        <div class="input-group">
+                            <label>DESTINATION BANK ID</label>
+                            <input type="text" id="transfer-id" maxlength="8" placeholder="E.g., 58294173" required>
+                        </div>
+                        <div class="input-group">
+                            <label>AMOUNT (LMT)</label>
+                            <input type="number" id="transfer-amount" step="0.01" min="0.1" placeholder="0.00 LMT" required>
+                        </div>
+                        <button type="submit" class="cyber-btn green-glow">EXECUTE TRANSACTION</button>
+                    </form>
                 </div>
             </div>
-        </div>
 
-        <div id="admin-panel" class="panel">
-            <div class="glass card">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
-                    <h2 style="font-family: 'Orbitron';">CORE CONTROL</h2>
-                    <button class="cyber-btn red-glow" style="width: auto; padding: 8px 20px;" onclick="logout()">LOGOUT</button>
+            <div class="dash-column">
+                <div class="glass card history-card">
+                    <h3 class="neon-title-green">📡 LIVE LEDGER PROTOCOLS</h3>
+                    <div class="ledger-container" id="ledger-history"></div>
+                </div>
+                <button class="cyber-btn logout-btn" onclick="logout()">DISCONNECT TERMINAL</button>
+            </div>
+        </section>
+
+        <section class="panel dashboard-layout admin-layout" id="admin-dashboard">
+            <div class="admin-top-bar glass">
+                <h2 class="gold-neon-text">⚡ TRUSTIX OVERLORD CONTROL PANEL</h2>
+                <div class="admin-meta">
+                    <span>ROOT_ACCESS: ACTIVE</span>
+                    <button class="cyber-btn logout-btn" onclick="logout()">LOGOUT</button>
+                </div>
+            </div>
+
+            <div class="admin-grid">
+                <div class="glass card admin-actions">
+                    <h3 class="gold-neon-text">MATRIX MODIFICATION</h3>
+                    <div class="input-group">
+                        <label>TARGET BANK ID</label>
+                        <input type="text" id="admin-target-id" placeholder="Target 8-digit ID">
+                    </div>
+                    <div class="input-group">
+                        <label>CREDIT QUANTITY</label>
+                        <input type="number" id="admin-amount" placeholder="0.00">
+                    </div>
+                    <div class="admin-btn-group">
+                        <button class="cyber-btn gold-glow" onclick="executeAdminAction('give')">GIVE CREDITS</button>
+                        <button class="cyber-btn red-glow" onclick="executeAdminAction('remove')">BURN CREDITS</button>
+                        <button class="cyber-btn red-glow" onclick="executeAdminAction('ban')">TERMINATE / BAN</button>
+                        <button class="cyber-btn green-glow" onclick="executeAdminAction('unban')">REVIVE / UNBAN</button>
+                    </div>
                 </div>
 
-                <div class="admin-grid">
-                    <div>
-                        <div class="input-group">
-                            <label>TARGET USER</label>
-                            <input type="text" id="admin-target-user" placeholder="USER ID...">
-                        </div>
-                        <div class="input-group">
-                            <label>AMOUNT</label>
-                            <input type="number" id="admin-amount" placeholder="0.00">
-                        </div>
-
-                        <div class="buttons-fix-container">
-                            <button class="cyber-btn" onclick="adminAction('inject')">INJECT CREDITS</button>
-                            <button class="cyber-btn red-glow" onclick="adminAction('drain')">DRAIN CREDITS</button>
-                        </div>
-                        <div class="buttons-fix-container" style="margin-top: 20px;">
-                            <button class="cyber-btn" style="border-color: #eab308;" onclick="adminAction('ban')">BAN USER</button>
-                            <button class="cyber-btn" onclick="adminAction('unban')">UNBAN USER</button>
-                        </div>
-                    </div>
-
+                <div class="glass card admin-monitor">
+                    <h3 class="gold-neon-text">SYSTEM NODES MONITOR</h3>
                     <div class="table-wrapper">
                         <table>
                             <thead>
                                 <tr>
-                                    <th>USER ID</th>
+                                    <th>USER</th>
+                                    <th>BANK ID</th>
                                     <th>BALANCE</th>
                                     <th>STATUS</th>
-                                    <th>ACTIONS</th>
+                                    <th>ACTION</th>
                                 </tr>
                             </thead>
-                            <tbody id="admin-users-table"></tbody>
+                            <tbody id="admin-user-table"></tbody>
                         </table>
                     </div>
                 </div>
             </div>
-        </div>
+        </section>
 
-    </div>
+        <section class="panel glass ban-panel" id="ban-panel">
+            <div class="glitch-wrapper">
+                <h1 class="ban-title-red glitch" data-text="TERMINAL BANNED">TERMINAL BANNED</h1>
+            </div>
+            <p class="ban-desc">Your biological ID and access tokens have been permanently neutralized due to Anti-Cyberwarfare Violation Protocol.</p>
+            <div class="cyber-error-code">ERROR_CODE: 0x88F0024B</div>
+        </section>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script>
-        // Код крутящейся 3D планеты
-        const canvas = document.getElementById('cyber-canvas');
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    </main>
 
-        const geometry = new THREE.SphereGeometry(4, 30, 30);
-        const material = new THREE.MeshBasicMaterial({
-            color: 0x00ff66,
-            wireframe: true,
-            transparent: true,
-            opacity: 0.15
-        });
-        const planet = new THREE.Mesh(geometry, material);
-        scene.add(planet);
-
-        camera.position.z = 8;
-
-        function animate() {
-            requestAnimationFrame(animate);
-            planet.rotation.y += 0.002;
-            planet.rotation.x += 0.001;
-            renderer.render(scene, camera);
-        }
-        animate();
-
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
-
-        // Скрипт переключения Login / Register
-        function switchAuthTab(tab) {
-            const loginForm = document.getElementById('login-form');
-            const registerForm = document.getElementById('register-form');
-            const tabs = document.querySelectorAll('.tab-btn');
-
-            tabs.forEach(t => t.classList.remove('active'));
-
-            if (tab === 'login') {
-                tabs[0].classList.add('active');
-                loginForm.classList.add('active');
-                registerForm.classList.remove('active');
-            } else {
-                tabs[1].classList.add('active');
-                registerForm.classList.add('active');
-                loginForm.classList.remove('active');
-            }
-        }
-
-        // Прелоадер
-        window.addEventListener('load', () => {
-            setTimeout(() => {
-                const preloader = document.getElementById('preloader');
-                preloader.style.opacity = '0';
-                setTimeout(() => preloader.style.display = 'none', 500);
-            }, 1000);
-        });
-
-        function setTheme(theme) {
-            document.body.className = '';
-            if (theme !== 'green') document.body.classList.add('theme-' + theme);
-            if (theme === 'green') planet.material.color.setHex(0x00ff66);
-            if (theme === 'cyan') planet.material.color.setHex(0x00f0ff);
-            if (theme === 'pink') planet.material.color.setHex(0xff00ff);
-        }
-
-        function handleAuth(type) {
-            document.getElementById('auth-panel').classList.remove('active');
-            document.getElementById('dashboard-panel').classList.add('active');
-        }
-        function logout() {
-            document.getElementById('dashboard-panel').classList.remove('active');
-            document.getElementById('admin-panel').classList.remove('active');
-            document.getElementById('auth-panel').classList.add('active');
-        }
-        function executeTransaction() {}
-        function adminAction(type) {}
-    </script>
+    <script src="supabase.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
