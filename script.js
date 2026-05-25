@@ -1,31 +1,50 @@
 /**
- * TRUSTIX BANK // CORE ENGINE & THREE.JS CINEMATIC DRIVER
+ * TRUSTIX BANK // CORE ENGINE & UNBREAKABLE UI DRIVER
  */
 
 let currentUser = null;
 
-// Инициализация при загрузке DOM
+// Главный инициализатор ядра
 document.addEventListener('DOMContentLoaded', () => {
-    initThreeBackground();
-    setupAuthTabs();
-    setupForms();
     
-    // Симуляция завершения загрузки прелоадера
+    // ГАРАНТИРОВАННЫЙ ВЫХОД ИЗ ПРЕЛОАДЕРА
     setTimeout(() => {
         const preloader = document.getElementById('preloader');
-        preloader.style.opacity = '0';
-        setTimeout(() => preloader.style.display = 'none', 600);
-    }, 1800);
+        if (preloader) {
+            preloader.style.opacity = '0';
+            setTimeout(() => {
+                preloader.style.display = 'none';
+            }, 600);
+        }
+    }, 1500);
+
+    // Безопасная инициализация модулей интерфейса
+    try {
+        setupAuthTabs();
+        setupForms();
+    } catch (err) {
+        console.error("Critical UI modules failed:", err);
+    }
+
+    // Изолированный запуск тяжелой 3D графики
+    try {
+        initThreeBackground();
+    } catch (err) {
+        console.warn("Matrix Hologram engine failed to load. Falling back to 2D dark mode.", err);
+    }
 });
 
 /* ==========================================
-   THREE.JS: КИНЕМАТОГРАФИЧЕСКАЯ 3D ЗЕМЛЯ
+   THREE.JS: ОТКАЗОУСТОЙЧИВАЯ 3D СЦЕНА
    ========================================== */
 function initThreeBackground() {
     const canvas = document.getElementById('cyber-canvas');
+    if (!canvas || typeof THREE === 'undefined') {
+        console.log("Three.js absent or blocked. CSS background activated.");
+        return;
+    }
+
     const scene = new THREE.Scene();
-    
-    // Фоновый туман для глубины
     scene.fog = new THREE.FogExp2(0x030a06, 0.015);
 
     const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -35,7 +54,6 @@ function initThreeBackground() {
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-    // Геометрия Земли (Глобус из неоновой сетки)
     const geometry = new THREE.SphereGeometry(65, 45, 45);
     const material = new THREE.MeshBasicMaterial({
         color: 0x00ff66,
@@ -46,7 +64,6 @@ function initThreeBackground() {
     const earthMesh = new THREE.Mesh(geometry, material);
     scene.add(earthMesh);
 
-    // Внутреннее светящееся ядро планеты
     const coreGeo = new THREE.SphereGeometry(63, 16, 16);
     const coreMat = new THREE.MeshBasicMaterial({
         color: 0x003311,
@@ -57,7 +74,6 @@ function initThreeBackground() {
     const coreMesh = new THREE.Mesh(coreGeo, coreMat);
     scene.add(coreMesh);
 
-    // Массив парящих частиц в атмосфере (Moving Particles)
     const particlesGeo = new THREE.BufferGeometry();
     const particlesCount = 350;
     const posArray = new Float32Array(particlesCount * 3);
@@ -76,26 +92,18 @@ function initThreeBackground() {
     const particlesMesh = new THREE.Points(particlesGeo, particlesMat);
     scene.add(particlesMesh);
 
-    // Цикл визуализации GPU Optimized
     function animate() {
         requestAnimationFrame(animate);
-        
-        // Медленное величественное вращение планеты
         earthMesh.rotation.y += 0.0008;
         earthMesh.rotation.x += 0.0002;
-        
         coreMesh.rotation.y -= 0.0004;
-
-        // Движение атмосферных частиц
         particlesMesh.rotation.y += 0.0003;
         particlesMesh.rotation.x -= 0.0001;
-
         renderer.render(scene, camera);
     }
 
     animate();
 
-    // Отслеживание изменения размеров окна
     window.addEventListener('resize', () => {
         camera.aspect = window.innerWidth / window.innerHeight;
         camera.updateProjectionMatrix();
@@ -111,6 +119,8 @@ function setupAuthTabs() {
     const tabRegister = document.getElementById('tab-register');
     const loginForm = document.getElementById('login-form');
     const registerForm = document.getElementById('register-form');
+
+    if (!tabLogin || !tabRegister || !loginForm || !registerForm) return;
 
     tabLogin.addEventListener('click', () => {
         tabLogin.classList.add('active');
@@ -128,85 +138,86 @@ function setupAuthTabs() {
 }
 
 function setupForms() {
-    // Обработка регистрации
-    document.getElementById('register-form').addEventListener('submit', (e) => {
-        e.preventDefault();
-        const user = document.getElementById('reg-username').value.trim();
-        const pass = document.getElementById('reg-password').value;
-        const repeatPass = document.getElementById('reg-repeat-password').value;
+    const regForm = document.getElementById('register-form');
+    const logForm = document.getElementById('login-form');
+    const txForm = document.getElementById('transfer-form');
 
-        if (user.length < 3) return showToast("Имя пользователя слишком короткое", true);
-        if (pass.length < 4) return showToast("Пароль слишком простой", true);
-        if (pass !== repeatPass) return showToast("Пароли не совпадают", true);
+    if (regForm) {
+        regForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const user = document.getElementById('reg-username').value.trim();
+            const pass = document.getElementById('reg-password').value;
+            const repeatPass = document.getElementById('reg-repeat-password').value;
 
-        const newUser = DB.createUser(user, pass);
-        if (!newUser) {
-            return showToast("Имя занято в нейросети", true);
-        }
+            if (user.length < 3) return showToast("Имя пользователя слишком короткое", true);
+            if (pass.length < 4) return showToast("Пароль слишком простой", true);
+            if (pass !== repeatPass) return showToast("Пароли не совпадают", true);
 
-        showToast(`Аккаунт создан! Ваш ID: ${newUser.bankId}`);
-        document.getElementById('register-form').reset();
-        document.getElementById('tab-login').click();
-    });
+            const newUser = DB.createUser(user, pass);
+            if (!newUser) return showToast("Имя занято в нейросети", true);
 
-    // Обработка логина
-    document.getElementById('login-form').addEventListener('submit', (e) => {
-        e.preventDefault();
-        const user = document.getElementById('login-username').value.trim();
-        const pass = document.getElementById('login-password').value;
+            showToast(`Аккаунт создан! Ваш ID: ${newUser.bankId}`);
+            regForm.reset();
+            const tabLogin = document.getElementById('tab-login');
+            if (tabLogin) tabLogin.click();
+        });
+    }
 
-        const foundUser = DB.findUser(user);
-        if (!foundUser || foundUser.password !== pass) {
-            return showToast("Крипто-ключ неверный или сущности нет", true);
-        }
+    if (logForm) {
+        logForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const user = document.getElementById('login-username').value.trim();
+            const pass = document.getElementById('login-password').value;
 
-        if (foundUser.isBanned) {
-            document.getElementById('ban-overlay').style.display = 'flex';
-            return;
-        }
+            const foundUser = DB.findUser(user);
+            if (!foundUser || foundUser.password !== pass) {
+                return showToast("Крипто-ключ неверный или сущности нет", true);
+            }
 
-        // Вход выполнен успешно
-        currentUser = foundUser;
-        showToast(`Сессия открыта. Приветствуем, ${currentUser.username}`);
-        switchScreen(currentUser.isAdmin ? 'admin-dashboard' : 'user-dashboard');
-        updateDashboardData();
-    });
+            if (foundUser.isBanned) {
+                const banOverlay = document.getElementById('ban-overlay');
+                if (banOverlay) banOverlay.style.display = 'flex';
+                return;
+            }
 
-    // Перевод денег пользователем
-    document.getElementById('transfer-form').addEventListener('submit', (e) => {
-        e.preventDefault();
-        const targetId = document.getElementById('transfer-target-id').value.trim();
-        const amount = parseFloat(document.getElementById('transfer-amount').value);
+            currentUser = foundUser;
+            showToast(`Сессия открыта. Приветствуем, ${currentUser.username}`);
+            switchScreen(currentUser.isAdmin ? 'admin-dashboard' : 'user-dashboard');
+            updateDashboardData();
+        });
+    }
 
-        if (amount <= 0 || isNaN(amount)) return showToast("Некорректная сумма перевода", true);
-        if (currentUser.bankId === targetId) return showToast("Нельзя переводить себе", true);
-        if (currentUser.balance < amount) return showToast("Недостаточно кредитов на балансе", true);
+    if (txForm) {
+        txForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const targetId = document.getElementById('transfer-target-id').value.trim();
+            const amount = parseFloat(document.getElementById('transfer-amount').value);
 
-        const recipient = DB.findUserById(targetId);
-        if (!recipient) return showToast("Адресат не найден в Matrix DB", true);
-        if (recipient.isBanned) return showToast("Счет получателя заблокирован", true);
+            if (amount <= 0 || isNaN(amount)) return showToast("Некорректная сумма перевода", true);
+            if (currentUser.bankId === targetId) return showToast("Нельзя переводить себе", true);
+            if (currentUser.balance < amount) return showToast("Недостаточно кредитов на балансе", true);
 
-        // Проведение транзакции
-        DB.updateBalance(currentUser.bankId, currentUser.balance - amount);
-        DB.updateBalance(recipient.bankId, recipient.balance + amount);
-        DB.addTransaction(currentUser.bankId, currentUser.username, recipient.bankId, recipient.username, amount);
+            const recipient = DB.findUserById(targetId);
+            if (!recipient) return showToast("Адресат не найден в Matrix DB", true);
+            if (recipient.isBanned) return showToast("Счет получателя заблокирован", true);
 
-        // Обновление локального стейта
-        currentUser = DB.findUser(currentUser.username);
-        showToast("Квантовый перевод завершен успешно!");
-        document.getElementById('transfer-form').reset();
-        updateDashboardData();
-    });
+            DB.updateBalance(currentUser.bankId, currentUser.balance - amount);
+            DB.updateBalance(recipient.bankId, recipient.balance + amount);
+            DB.addTransaction(currentUser.bankId, currentUser.username, recipient.bankId, recipient.username, amount);
+
+            currentUser = DB.findUser(currentUser.username);
+            showToast("Квантовый перевод завершен успешно!");
+            txForm.reset();
+            updateDashboardData();
+        });
+    }
 }
 
-/* ==========================================
-   ОБНОВЛЕНИЕ ДАННЫХ И ЭКРАНОВ UI
-   ========================================== */
 function switchScreen(screenId) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     setTimeout(() => {
         const target = document.getElementById(screenId);
-        target.classList.add('active');
+        if (target) target.classList.add('active');
     }, 150);
 }
 
@@ -214,8 +225,8 @@ function updateDashboardData() {
     if (!currentUser) return;
 
     if (currentUser.isAdmin) {
-        // Логика админ-панели
         const tableBody = document.getElementById('admin-users-table');
+        if (!tableBody) return;
         tableBody.innerHTML = '';
         
         const db = DB.getRawData();
@@ -233,13 +244,16 @@ function updateDashboardData() {
             tableBody.appendChild(tr);
         });
     } else {
-        // Логика обычного пользователя
-        document.getElementById('user-display-name').innerText = currentUser.username.toUpperCase();
-        document.getElementById('user-display-id').innerText = `ID: ${currentUser.bankId}`;
-        document.getElementById('user-display-balance').innerHTML = `${currentUser.balance.toFixed(2)} <span>₮</span>`;
+        const uName = document.getElementById('user-display-name');
+        const uId = document.getElementById('user-display-id');
+        const uBalance = document.getElementById('user-display-balance');
 
-        // Рендеринг истории транзакций
+        if (uName) uName.innerText = currentUser.username.toUpperCase();
+        if (uId) uId.innerText = `ID: ${currentUser.bankId}`;
+        if (uBalance) uBalance.innerHTML = `${currentUser.balance.toFixed(2)} <span>₮</span>`;
+
         const logContainer = document.getElementById('transaction-log');
+        if (!logContainer) return;
         logContainer.innerHTML = '';
         const txs = DB.getTransactionsForUser(currentUser.bankId);
 
@@ -264,9 +278,6 @@ function updateDashboardData() {
     }
 }
 
-/* ==========================================
-   АДМИНИСТРАТИВНЫЕ МАКРОСЫ-ДЕЙСТВИЯ
-   ========================================== */
 function triggerAdminAction(actionType) {
     const targetId = document.getElementById('admin-target-id').value.trim();
     const amount = parseFloat(document.getElementById('admin-amount').value);
@@ -311,15 +322,14 @@ function triggerAdminAction(actionType) {
             break;
     }
 
-    document.getElementById('admin-action-form').reset();
+    const adminForm = document.getElementById('admin-action-form');
+    if (adminForm) adminForm.reset();
     updateDashboardData();
 }
 
-/* ==========================================
-   ВСПОМОГАТЕЛЬНЫЕ СИСТЕМНЫЕ ФУНКЦИИ
-   ========================================== */
 function showToast(message, isError = false) {
     const container = document.getElementById('notification-container');
+    if (!container) return;
     const toast = document.createElement('div');
     toast.className = `toast ${isError ? 'error' : ''}`;
     toast.innerText = `// ${message.toUpperCase()}`;
@@ -335,10 +345,12 @@ function logout() {
     currentUser = null;
     showToast("Сессия успешно закрыта");
     switchScreen('auth-screen');
-    document.getElementById('login-form').reset();
+    const logForm = document.getElementById('login-form');
+    if (logForm) logForm.reset();
 }
 
 function closeBanOverlay() {
-    document.getElementById('ban-overlay').style.display = 'none';
+    const banOverlay = document.getElementById('ban-overlay');
+    if (banOverlay) banOverlay.style.display = 'none';
     logout();
 }
